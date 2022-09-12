@@ -1,12 +1,14 @@
 ﻿namespace XpiritInsurance.Api.Controllers
 {
     using System.Net;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Identity.Web;
     using Microsoft.Identity.Web.Resource;
     using XpiritInsurance.Api.Models;
     using XpiritInsurance.Api.Services;
 
+    [Authorize]
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes")]
     [ApiController]
     [Route("[controller]")]
@@ -32,7 +34,7 @@
 
         [ProducesDefaultResponseType]
         [HttpPost]
-        public async Task<IActionResult> ClaimDamage(DamageClaim damageClaim)
+        public async Task<IActionResult> ClaimDamage([FromBody]DamageClaim damageClaim)
         {
             string userName = HttpContext.User.GetDisplayName() ?? "unknown";
             decimal amount = damageClaim.Amount;

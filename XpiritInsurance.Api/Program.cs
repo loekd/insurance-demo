@@ -1,11 +1,5 @@
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Configuration;
-using XpiritInsurance.Api.Services;
 
 namespace XpiritInsurance.Api;
 
@@ -37,38 +31,36 @@ public class Program
                               });
         });
 
+        builder.Services.AddControllers();
+        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+
+
         //Add mock services
         builder.Services.AddSingleton<Services.QuoteAmountService>();
-        builder.Services.AddSingleton<Services.InsuranceService>(); 
+        builder.Services.AddSingleton<Services.InsuranceService>();
         builder.Services.AddSingleton<Services.DamageClaimService>();
-
-        builder.Services.AddControllers();
 
         var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
-        {
-            app.UseExceptionHandler("/Home/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
-        }
+
 
         app.UseHttpsRedirection();
-        //app.UseStaticFiles();
-
-        app.UseRouting();
         app.UseCors(CorsPolicyName);
 
         app.UseAuthentication();
         app.UseAuthorization();
 
-        //app.MapControllerRoute(
-        //    name: "default",
-        //    pattern: "{controller=Home}/{action=Index}/{id?}");
-        //app.MapRazorPages();
-        app.MapControllers();
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
+        app.MapControllers();
 
         app.Run();
     }

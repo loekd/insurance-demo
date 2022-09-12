@@ -13,7 +13,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7008;http://localhost:5142",
-      "launchUrl": "https://localhost:7008/api/weatherforecast",
+      "launchUrl": "https://localhost:7008/swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

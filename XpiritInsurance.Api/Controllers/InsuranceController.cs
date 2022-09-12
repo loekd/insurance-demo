@@ -1,12 +1,14 @@
 ﻿namespace XpiritInsurance.Api.Controllers
 {
     using System.Net;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.Identity.Web;
     using Microsoft.Identity.Web.Resource;
     using XpiritInsurance.Api.Models;
     using XpiritInsurance.Api.Services;
 
+    [Authorize]
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes")]
     [ApiController]
     [Route("[controller]")]
@@ -34,7 +36,7 @@
 
         [ProducesDefaultResponseType]
         [HttpPost]
-        public async Task<IActionResult> BuyInsurance(Quote quote)
+        public async Task<IActionResult> BuyInsurance([FromBody] Quote quote)
         {
             string userName = HttpContext.User.GetDisplayName() ?? "unknown";
             decimal amount = quote.AmountPerMonth;
@@ -50,7 +52,7 @@
 
         [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Quote))]
         [HttpGet("quote")]
-        public async Task<IActionResult> CalculateQuote(InsuranceType insuranceType)
+        public async Task<IActionResult> CalculateQuote([FromQuery]InsuranceType insuranceType)
         {
             string userName = HttpContext.User.GetDisplayName() ?? "unknown";
             decimal amount = await _quoteAmountService.CalculateQuote(userName, insuranceType);

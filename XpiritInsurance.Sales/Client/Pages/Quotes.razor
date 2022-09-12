@@ -1,0 +1,132 @@
+﻿@page "/quotes"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using XpiritInsurance.Sales.Client.Models
+@attribute [Authorize]
+@inject HttpClient Http
+
+<h1>Quotes</h1>
+
+<div class="contentDiv">
+    <MudSimpleTable Style="overflow-x: auto;" Hover="true" Striped="true">
+        <thead>
+            <tr>
+                <th>Insurance Type</th>
+                <th>Amount per mont</th>
+                <th>Quote</th>
+                <th>Buy</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var quote in _quotes)
+            {
+                <tr>
+                    <td>@quote.Key</td>
+                    <td>@quote.Value</td>
+                    <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
+                    <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => Buy(quote.Key)">Buy this</MudButton></td>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+
+    @if (_hasError)
+    {
+        <MudAlert Severity="Severity.Error">@_message</MudAlert>
+    }
+    else if (_hasSuccess)
+    {
+        <MudAlert Severity="Severity.Info">@_message</MudAlert>
+    }
+
+</div>
+
+@if (_isLoading)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+
+@code {
+
+    private Dictionary<string, decimal?> _quotes = new();
+    private bool _hasError = false;
+    private bool _hasSuccess = false;
+    private bool _isLoading = false;
+    private string? _message;
+
+
+    protected override void OnInitialized()
+    {
+        foreach (var insuranceType in Enum.GetNames(typeof(InsuranceType)))
+        {
+            _quotes.Add(insuranceType, null);
+        }
+
+        base.OnInitialized();
+    }
+
+    private async Task GetQuote(string insuranceType)
+    {
+        try
+        {
+            _isLoading = true;
+            _hasError = false;
+            _hasSuccess = false;
+
+            var quote = await Http.GetFromJsonAsync<Quote>($"insurance/quote?insuranceType={insuranceType}");
+            if (quote != null) _quotes[insuranceType] = quote.AmountPerMonth;
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            _hasError = true;
+            _message = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task Buy(string insuranceType)
+    {
+        try
+        {
+            _hasError = false;
+            _hasSuccess = false;
+            _isLoading = true;
+            _message = null;
+
+            var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
+            if (_quotes.TryGetValue(insuranceType, out var amount) && amount.HasValue)
+            {
+                var response = await Http.PostAsJsonAsync<Quote>($"insurance", new Quote("", it, amount.Value));
+                response.EnsureSuccessStatusCode();
+                _message = $"Bought {insuranceType} insurance for {amount.Value}€ per month.";
+                _hasSuccess = true;
+            }
+            else
+            {
+                _message = "Get a quote first!";
+                _hasError = true;
+
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            _hasError = true;
+            _message = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

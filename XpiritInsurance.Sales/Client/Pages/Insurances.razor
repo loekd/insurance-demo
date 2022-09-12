@@ -1,0 +1,78 @@
+﻿@page "/insurances"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using XpiritInsurance.Sales.Client.Models
+@attribute [Authorize]
+@inject HttpClient Http
+
+<h1>Insurance</h1>
+
+<div class="contentDiv">
+    @if (_insurances == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <MudSimpleTable Style="overflow-x: auto;" Hover="true" Striped="true">
+            <thead>
+                <tr>
+                    <th>Insurance</th>
+                    <th>Monthly amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var insurance in _insurances)
+                {
+                    <tr>
+                        <td>@insurance.InsuranceType</td>
+                        <td>@insurance.AmountPerMonth</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    }
+
+    @if (_hasError)
+    {
+        <MudAlert Severity="Severity.Error">@_message</MudAlert>
+    }
+
+</div>
+
+@if (_isLoading)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+
+
+@code {
+    private List<Insurance> _insurances = new();
+    private bool _hasError = false;
+    private bool _isLoading = false;
+    private string? _message;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hasError = false;
+        _isLoading = true;
+        try
+        {
+            var data = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurance");
+            if (data != null) _insurances.AddRange(data);
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            _hasError = true;
+            _message = ex.Message;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+}

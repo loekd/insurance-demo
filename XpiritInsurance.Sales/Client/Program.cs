@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor.Services;
 using XpiritInsurance.Sales.Client;
 
 //uncomment to debug this method.
@@ -29,4 +30,5 @@ builder.Services.AddMsalAuthentication(options =>
     options.ProviderOptions.LoginMode = "redirect";
 });
 
+builder.Services.AddMudServices();
 await builder.Build().RunAsync();

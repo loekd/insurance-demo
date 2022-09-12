@@ -5,6 +5,7 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
+using XpiritInsurance.Api.Services;
 
 namespace XpiritInsurance.Api;
 
@@ -35,6 +36,11 @@ public class Program
                                     .AllowAnyMethod();
                               });
         });
+
+        //Add mock services
+        builder.Services.AddSingleton<Services.QuoteAmountService>();
+        builder.Services.AddSingleton<Services.InsuranceService>(); 
+        builder.Services.AddSingleton<Services.DamageClaimService>();
 
         builder.Services.AddControllers();
 

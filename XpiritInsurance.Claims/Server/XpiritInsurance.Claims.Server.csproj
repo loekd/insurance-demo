@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Client\XpiritInsurance.Claims.Client.csproj" />
-    <ProjectReference Include="..\Shared\XpiritInsurance.Claims.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

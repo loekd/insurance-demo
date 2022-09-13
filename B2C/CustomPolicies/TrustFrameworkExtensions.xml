@@ -1,0 +1,443 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TrustFrameworkPolicy xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06" 
+  PolicySchemaVersion="0.3.0.0" 
+  TenantId="xpiritinsurance.onmicrosoft.com" PolicyId="B2C_1A_TrustFrameworkExtensions" 
+  PublicPolicyUri="http://xpiritinsurance.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions">
+
+  <BasePolicy>
+    <TenantId>xpiritinsurance.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkBase</PolicyId>
+  </BasePolicy>
+  <BuildingBlocks>
+    <ClaimsSchema>
+      <ClaimType Id="socialIdpUserId">
+        <DisplayName>Username</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText />
+        <UserInputType>TextBox</UserInputType>
+        <Restriction>
+          <Pattern RegularExpression="^[a-zA-Z0-9]+[a-zA-Z0-9_-]*$" HelpText="The username you provided is not valid. It must begin with an alphabet or number and can contain alphabets, numbers and the following symbols: _ -" />
+        </Restriction>
+      </ClaimType>
+    </ClaimsSchema>
+
+    <ContentDefinitions>
+
+      <!-- This content definition is to render an error page that displays unhandled errors. -->
+      <ContentDefinition Id="api.error">
+        <LoadUri>~/tenant/templates/AzureBlue/exception.cshtml</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:globalexception:1.2.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Error page</Item>
+        </Metadata>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.idpselections">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/idpSelector.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:providerselection:1.2.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Idp selection page</Item>
+          <Item Key="language.intro">Sign in</Item>
+        </Metadata>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.idpselections.signup">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/idpSelector.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:providerselection:1.2.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Idp selection page</Item>
+          <Item Key="language.intro">Sign up</Item>
+        </Metadata>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.signuporsignin">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/unified.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:unifiedssp:1.2.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Signin and Signup</Item>
+        </Metadata>
+        <LocalizedResourcesReferences MergeBehavior="Prepend">
+          <LocalizedResourcesReference Language="en" LocalizedResourcesReferenceId="api.localaccountsignup.en" />
+          <LocalizedResourcesReference Language="nl" LocalizedResourcesReferenceId="api.localaccountsignup.nl" />
+        </LocalizedResourcesReferences>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.phonefactor">
+        <LoadUri>~/tenant/templates/AzureBlue/multifactor-1.0.0.cshtml</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:multifactor:1.2.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Multi-factor authentication page</Item>
+        </Metadata>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.selfasserted">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/selfasserted.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.0.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Collect information from user page</Item>
+        </Metadata>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.selfasserted.profileupdate">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/selfasserted.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.0.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Collect information from user page</Item>
+        </Metadata>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.localaccountsignup">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/selfasserted.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.0.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Local account sign up page</Item>
+        </Metadata>
+        <LocalizedResourcesReferences MergeBehavior="Prepend">
+          <LocalizedResourcesReference Language="en" LocalizedResourcesReferenceId="api.localaccountsignup.en" />
+          <LocalizedResourcesReference Language="nl" LocalizedResourcesReferenceId="api.localaccountsignup.nl" />
+        </LocalizedResourcesReferences>
+      </ContentDefinition>
+
+      <ContentDefinition Id="api.localaccountpasswordreset">
+        <LoadUri>https://xpiritdemostorage.z6.web.core.windows.net/selfasserted.html</LoadUri>
+        <RecoveryUri>~/common/default_page_error.html</RecoveryUri>
+        <DataUri>urn:com:microsoft:aad:b2c:elements:contract:selfasserted:2.0.0</DataUri>
+        <Metadata>
+          <Item Key="DisplayName">Local account change password page</Item>
+        </Metadata>
+      </ContentDefinition>
+
+    </ContentDefinitions> 
+
+    <Localization Enabled="true">
+      <SupportedLanguages DefaultLanguage="nl" MergeBehavior="ReplaceAll">
+        <SupportedLanguage>en</SupportedLanguage>
+        <SupportedLanguage>nl</SupportedLanguage>
+        <SupportedLanguage>de</SupportedLanguage>
+        <SupportedLanguage>fr</SupportedLanguage>
+      </SupportedLanguages>
+
+      <LocalizedResources Id="api.localaccountsignup.en">
+        <LocalizedCollections>
+          <LocalizedCollection ElementType="ClaimType" ElementId="signupForNewsLetter" TargetCollection="Restriction">
+            <Item Text="I want to be kept up to date" Value="True" />
+          </LocalizedCollection>
+        </LocalizedCollections>
+        <LocalizedStrings>
+          <LocalizedString ElementType="ClaimType" ElementId="companyName" StringId="DisplayName">Company name</LocalizedString>
+          <LocalizedString ElementType="ClaimType" ElementId="givenName" StringId="DisplayName">Given name</LocalizedString>
+          <LocalizedString ElementType="ClaimType" ElementId="surName" StringId="DisplayName">Surname</LocalizedString>
+          <LocalizedString ElementType="UxElement" StringId="social_intro">Sign in or sign up</LocalizedString>
+        </LocalizedStrings>
+      </LocalizedResources>
+
+      <LocalizedResources Id="api.localaccountsignup.nl">
+        <LocalizedCollections>
+          <LocalizedCollection ElementType="ClaimType" ElementId="signupForNewsLetter" TargetCollection="Restriction">
+            <Item Text="Ik wil graag op de hoogte gehouden worden" Value="True" />
+          </LocalizedCollection>
+        </LocalizedCollections>
+        <LocalizedStrings>
+          <LocalizedString ElementType="ClaimType" ElementId="companyName" StringId="DisplayName">Bedrijfsnaam</LocalizedString>
+          <LocalizedString ElementType="ClaimType" ElementId="givenName" StringId="DisplayName">Voornaam</LocalizedString>
+          <LocalizedString ElementType="ClaimType" ElementId="surName" StringId="DisplayName">Achternaam</LocalizedString>
+          <LocalizedString ElementType="UxElement" StringId="social_intro">Log in of wordt lid</LocalizedString>
+        </LocalizedStrings>
+      </LocalizedResources>
+      
+
+    </Localization>
+
+  </BuildingBlocks>
+  <ClaimsProviders>
+
+
+    <ClaimsProvider>
+      <DisplayName>Azure Active Directory Store</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="AAD-Common">
+          <DisplayName>Azure Active Directory</DisplayName>
+          <!--  Demo action required: Provide objectId and appId before using extension properties.
+                For more information: https://docs.microsoft.com/en-us/azure/active-directory-b2c/active-directory-b2c-create-custom-attributes-profile-edit-custom 
+                Action required: Insert objectId and appId here -->
+          <Metadata>
+            <Item Key="ApplicationObjectId">f1133335-b54e-429f-9b5a-52d674636a4c</Item>
+            <Item Key="ClientId">830ead20-d26e-4813-9303-cd63ffe38c54</Item>
+          </Metadata>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <!-- Local account Sign-Up claims provider -->
+    <ClaimsProvider>
+      <DisplayName>Local Account</DisplayName>
+      <TechnicalProfiles>
+
+        <TechnicalProfile Id="LocalAccountSignUpWithLogonEmail-NoValidation">
+          <DisplayName>Email signup</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IpAddressClaimReferenceId">IpAddress</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignup</Item>
+            <Item Key="language.button_continue">Create</Item>
+            <Item Key="setting.operatingMode">Email</Item>
+            <Item Key="EnforceEmailVerification">False</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="issuer_secret" StorageReferenceId="B2C_1A_TokenSigningKeyContainer" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" />
+            <InputClaim ClaimTypeReferenceId="newPassword" />
+            <InputClaim ClaimTypeReferenceId="reenterPassword" />
+
+            <InputClaim ClaimTypeReferenceId="givenName" />
+            <InputClaim ClaimTypeReferenceId="surName" />
+
+          </InputClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="signInNames.emailAddress" PartnerClaimType="email"/>
+            <OutputClaim ClaimTypeReferenceId="email" />
+            <OutputClaim ClaimTypeReferenceId="newPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="reenterPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="executed-SelfAsserted-Input" DefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" />
+            <OutputClaim ClaimTypeReferenceId="newUser" />
+
+            <!-- Extra claims, to be collected from the user -->
+            <OutputClaim ClaimTypeReferenceId="givenName" />
+            <OutputClaim ClaimTypeReferenceId="surName" />
+
+          </OutputClaims>
+          <ValidationTechnicalProfiles>
+            <ValidationTechnicalProfile ReferenceId="AAD-UserWriteUsingLogonEmail" />
+          </ValidationTechnicalProfiles>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" />
+        </TechnicalProfile>
+
+        <TechnicalProfile Id="LocalAccountSignUpWithLogonEmail-Validation">
+          <DisplayName>Email signup</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.SelfAssertedAttributeProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IpAddressClaimReferenceId">IpAddress</Item>
+            <Item Key="ContentDefinitionReferenceId">api.localaccountsignup</Item>
+            <Item Key="language.button_continue">Create</Item>
+            <Item Key="setting.operatingMode">Email</Item>
+            <Item Key="EnforceEmailVerification">False</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="issuer_secret" StorageReferenceId="B2C_1A_TokenSigningKeyContainer" />
+          </CryptographicKeys>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="email" />
+            <InputClaim ClaimTypeReferenceId="newPassword" />
+            <InputClaim ClaimTypeReferenceId="reenterPassword" />
+
+            <InputClaim ClaimTypeReferenceId="givenName" />
+            <InputClaim ClaimTypeReferenceId="surName" />
+
+          </InputClaims>
+          <DisplayClaims>
+            <DisplayClaim DisplayControlReferenceId="emailControl" />
+            <DisplayClaim ClaimTypeReferenceId="newPassword" Required="true" />
+            <DisplayClaim ClaimTypeReferenceId="reenterPassword" Required="true" />
+
+            <DisplayClaim ClaimTypeReferenceId="givenName" Required="true" />
+            <DisplayClaim ClaimTypeReferenceId="surName" Required="true" />
+
+          </DisplayClaims>
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="signInNames.emailAddress" PartnerClaimType="email"/>
+            <OutputClaim ClaimTypeReferenceId="email" />
+            <OutputClaim ClaimTypeReferenceId="newPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="reenterPassword" Required="true" />
+            <OutputClaim ClaimTypeReferenceId="executed-SelfAsserted-Input" DefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" />
+            <OutputClaim ClaimTypeReferenceId="newUser" />
+
+            <!-- Extra claims, to be collected from the user -->
+            <OutputClaim ClaimTypeReferenceId="givenName" />
+            <OutputClaim ClaimTypeReferenceId="surName" />
+
+          </OutputClaims>
+          <ValidationTechnicalProfiles>
+            <ValidationTechnicalProfile ReferenceId="AAD-UserWriteUsingLogonEmail" />
+          </ValidationTechnicalProfiles>
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-AAD" />
+        </TechnicalProfile>
+
+        <TechnicalProfile Id="login-NonInteractive">
+          <Metadata>
+            <Item Key="client_id">f6124594-2ef7-4291-82b4-0003c4f0ac67</Item>
+            <Item Key="IdTokenAudience">f763e963-a0b6-44fb-8eb8-11b8e123e263</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="client_id" DefaultValue="f6124594-2ef7-4291-82b4-0003c4f0ac67" />
+            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource" DefaultValue="f763e963-a0b6-44fb-8eb8-11b8e123e263" />
+          </InputClaims>
+        </TechnicalProfile>
+
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    
+    <ClaimsProvider>
+      <Domain>facebook.com</Domain>
+      <DisplayName>Facebook</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="Facebook-OIDC-Base">
+          <DisplayName>Facebook</DisplayName>
+          <Protocol Name="OpenIdConnect" />
+          <Metadata>
+            <Item Key="ProviderName">https://loek.eu.auth0.com/</Item>
+            <Item Key="METADATA">https://loek.eu.auth0.com/.well-known/openid-configuration</Item>
+            <Item Key="response_types">code</Item>
+            <Item Key="response_mode">form_post</Item>
+            <Item Key="scope">openid profile email</Item>
+            <Item Key="HttpBinding">POST</Item>
+            <Item Key="UsePolicyInRedirectUri">0</Item>
+            <Item Key="client_id">LIGA9mLbINVl1ECvHQ2d0Klbo2FgboEI</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="client_secret" StorageReferenceId="B2C_1A_Auth0Secret" />
+          </CryptographicKeys>
+          <InputClaims />
+        </TechnicalProfile>
+
+        <TechnicalProfile Id="Facebook-OIDC">
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="Facebook" AlwaysUseDefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" DefaultValue="socialIdpAuthentication" />
+            <OutputClaim ClaimTypeReferenceId="socialIdpUserId" PartnerClaimType="sub" />
+            <OutputClaim ClaimTypeReferenceId="issuerUserId" PartnerClaimType="sub" />
+            <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name" />
+            <OutputClaim ClaimTypeReferenceId="email" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CreateRandomUPNUserName" />
+            <OutputClaimsTransformation ReferenceId="CreateUserPrincipalName" />
+            <OutputClaimsTransformation ReferenceId="CreateAlternativeSecurityId" />
+            <OutputClaimsTransformation ReferenceId="CreateSubjectClaimFromAlternativeSecurityId" />
+          </OutputClaimsTransformations>
+          <IncludeTechnicalProfile ReferenceId="Facebook-OIDC-Base" />
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-SocialLogin" />
+        </TechnicalProfile>
+
+
+      </TechnicalProfiles>      
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <Domain>digid.com</Domain>
+      <DisplayName>DigiD</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="DigiD-OIDC-Base">
+          <DisplayName>'DigiD'</DisplayName>
+          <Protocol Name="OpenIdConnect" />
+          <Metadata>
+            <Item Key="ProviderName">https://loek.eu.auth0.com/</Item>
+            <Item Key="METADATA">https://loek.eu.auth0.com/.well-known/openid-configuration</Item>
+            <Item Key="response_types">code</Item>
+            <Item Key="response_mode">form_post</Item>
+            <Item Key="scope">openid profile email</Item>
+            <Item Key="HttpBinding">POST</Item>
+            <Item Key="UsePolicyInRedirectUri">0</Item>
+            <Item Key="client_id">Wim1wCPKp5cV05SKVUdiKmeUEl0odMDE</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="client_secret" StorageReferenceId="B2C_1A_Auth0DigiDSecret" />
+          </CryptographicKeys>
+          <InputClaims />
+        </TechnicalProfile>
+        <TechnicalProfile Id="DigiD-OIDC">
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="DigiD" AlwaysUseDefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" DefaultValue="socialIdpAuthentication" />
+            <OutputClaim ClaimTypeReferenceId="socialIdpUserId" PartnerClaimType="sub" />
+            <OutputClaim ClaimTypeReferenceId="issuerUserId" PartnerClaimType="sub" />
+            <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name" />
+            <OutputClaim ClaimTypeReferenceId="email" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CreateRandomUPNUserName" />
+            <OutputClaimsTransformation ReferenceId="CreateUserPrincipalName" />
+            <OutputClaimsTransformation ReferenceId="CreateAlternativeSecurityId" />
+            <OutputClaimsTransformation ReferenceId="CreateSubjectClaimFromAlternativeSecurityId" />
+          </OutputClaimsTransformations>
+          <IncludeTechnicalProfile ReferenceId="DigiD-OIDC-Base" />
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-SocialLogin" />
+        </TechnicalProfile>
+      </TechnicalProfiles>      
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <Domain>xpirit.com</Domain>
+      <DisplayName>Employee Login</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="AADXpirit-OIDC-Base">
+          <DisplayName>Employee Login</DisplayName>
+          <Description>Login with your Xpirit account</Description>
+          <Protocol Name="OpenIdConnect"/>
+          <Metadata>
+            <Item Key="METADATA">https://login.microsoftonline.com/3d4d17ea-1ae4-4705-947e-51369c5a5f79/v2.0/.well-known/openid-configuration</Item>
+            <Item Key="client_id">1571fa77-eaaa-492f-9f6e-83af33b1d9a9</Item>
+            <Item Key="response_types">code</Item>
+            <Item Key="scope">openid profile</Item>
+            <Item Key="response_mode">form_post</Item>
+            <Item Key="HttpBinding">POST</Item>
+            <Item Key="UsePolicyInRedirectUri">false</Item>
+          </Metadata>
+          <CryptographicKeys>
+            <Key Id="client_secret" StorageReferenceId="B2C_1A_XpiritClientSecret"/>
+          </CryptographicKeys>
+          <InputClaims />
+        </TechnicalProfile>
+        <TechnicalProfile Id="AADXpirit-OIDC">
+          <OutputClaims>
+            <OutputClaim ClaimTypeReferenceId="issuerUserId" PartnerClaimType="oid"/>
+            <OutputClaim ClaimTypeReferenceId="tenantId" PartnerClaimType="tid"/>
+            <OutputClaim ClaimTypeReferenceId="givenName" PartnerClaimType="given_name" />
+            <OutputClaim ClaimTypeReferenceId="surName" PartnerClaimType="family_name" />
+            <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name" />
+            <OutputClaim ClaimTypeReferenceId="authenticationSource" DefaultValue="socialIdpAuthentication" AlwaysUseDefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="Xpirit" AlwaysUseDefaultValue="true" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CreateRandomUPNUserName"/>
+            <OutputClaimsTransformation ReferenceId="CreateUserPrincipalName"/>
+            <OutputClaimsTransformation ReferenceId="CreateAlternativeSecurityId"/>
+            <OutputClaimsTransformation ReferenceId="CreateSubjectClaimFromAlternativeSecurityId"/>
+          </OutputClaimsTransformations>
+          <IncludeTechnicalProfile ReferenceId="AADXpirit-OIDC-Base" />
+          <UseTechnicalProfileForSessionManagement ReferenceId="SM-SocialLogin"/>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+    <ClaimsProvider>
+      <DisplayName>Session Management</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="SM-Saml-idp">
+          <DisplayName>Session Management Provider</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.SSO.SamlSSOSessionProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <Metadata>
+            <Item Key="IncludeSessionIndex">false</Item>
+            <Item Key="RegisterServiceProviders">true</Item>
+          </Metadata>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+</TrustFrameworkPolicy>

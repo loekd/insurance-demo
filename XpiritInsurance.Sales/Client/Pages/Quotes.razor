@@ -4,6 +4,7 @@
 @using XpiritInsurance.Sales.Client.Models
 @attribute [Authorize]
 @inject HttpClient Http
+@inject ISnackbar Snackbar
 
 <h1>Quotes</h1>
 
@@ -23,21 +24,19 @@
                 <tr>
                     <td>@quote.Key</td>
                     <td>@quote.Value</td>
-                    <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
-                    <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => Buy(quote.Key)">Buy this</MudButton></td>
+                    @if (TryGetInsurance(quote.Key) == null)
+                    {
+                        <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
+                        <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => Buy(quote.Key)">Buy this</MudButton></td>
+                    }
+                    else
+                    {
+                        <td>Insured for @(GetInsuranceMonthlyDue(quote.Key))€ per month</td>
+                    }
                 </tr>
             }
         </tbody>
     </MudSimpleTable>
-
-    @if (_hasError)
-    {
-        <MudAlert Severity="Severity.Error">@_message</MudAlert>
-    }
-    else if (_hasSuccess)
-    {
-        <MudAlert Severity="Severity.Info">@_message</MudAlert>
-    }
 
 </div>
 
@@ -47,22 +46,60 @@
 }
 
 @code {
-
+    private List<Insurance> _insurances = new();
     private Dictionary<string, decimal?> _quotes = new();
-    private bool _hasError = false;
-    private bool _hasSuccess = false;
     private bool _isLoading = false;
-    private string? _message;
 
 
-    protected override void OnInitialized()
+    protected override Task OnInitializedAsync()
     {
+        return LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        _isLoading = true;
+
+        _quotes.Clear();
         foreach (var insuranceType in Enum.GetNames(typeof(InsuranceType)))
         {
             _quotes.Add(insuranceType, null);
         }
+        try
+        {
 
-        base.OnInitialized();
+            var data = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurance");
+            if (data != null)
+            {
+                _insurances.Clear();
+                _insurances.AddRange(data);
+            }
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Fetching insurances failed: {ex.Message}", Severity.Warning);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private Insurance? TryGetInsurance(string insuranceType)
+    {
+        var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
+        return _insurances.SingleOrDefault(dc => dc.InsuranceType == it);
+    }
+
+    private decimal GetInsuranceMonthlyDue(string insuranceType)
+    {
+        var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
+        var existing = _insurances.Single(dc => dc.InsuranceType == it);
+        return existing.AmountPerMonth;
     }
 
     private async Task GetQuote(string insuranceType)
@@ -70,8 +107,6 @@
         try
         {
             _isLoading = true;
-            _hasError = false;
-            _hasSuccess = false;
 
             var quote = await Http.GetFromJsonAsync<Quote>($"insurance/quote?insuranceType={insuranceType}");
             if (quote != null) _quotes[insuranceType] = quote.AmountPerMonth;
@@ -82,8 +117,7 @@
         }
         catch (Exception ex)
         {
-            _hasError = true;
-            _message = ex.Message;
+            Snackbar.Add($"Get quote failed: {ex.Message}", Severity.Warning);
         }
         finally
         {
@@ -95,24 +129,21 @@
     {
         try
         {
-            _hasError = false;
-            _hasSuccess = false;
             _isLoading = true;
-            _message = null;
 
             var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
             if (_quotes.TryGetValue(insuranceType, out var amount) && amount.HasValue)
             {
                 var response = await Http.PostAsJsonAsync<Quote>($"insurance", new Quote("", it, amount.Value));
                 response.EnsureSuccessStatusCode();
-                _message = $"Bought {insuranceType} insurance for {amount.Value}€ per month.";
-                _hasSuccess = true;
+                Snackbar.Add($"Bought {insuranceType} insurance for {amount.Value}€ per month.", Severity.Info);
+                
+                //refresh list
+                await LoadData();
             }
             else
             {
-                _message = "Get a quote first!";
-                _hasError = true;
-
+                Snackbar.Add("Get a quote first!", Severity.Error);
             }
         }
         catch (AccessTokenNotAvailableException exception)
@@ -121,8 +152,7 @@
         }
         catch (Exception ex)
         {
-            _hasError = true;
-            _message = ex.Message;
+            Snackbar.Add($"Buy insurance failed: {ex.Message}", Severity.Warning);
         }
         finally
         {

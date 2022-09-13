@@ -4,6 +4,7 @@
 @using XpiritInsurance.Sales.Client.Models
 @attribute [Authorize]
 @inject HttpClient Http
+@inject ISnackbar Snackbar
 
 <h1>Insurance</h1>
 
@@ -32,12 +33,6 @@
             </tbody>
         </MudSimpleTable>
     }
-
-    @if (_hasError)
-    {
-        <MudAlert Severity="Severity.Error">@_message</MudAlert>
-    }
-
 </div>
 
 @if (_isLoading)
@@ -48,13 +43,10 @@
 
 @code {
     private List<Insurance> _insurances = new();
-    private bool _hasError = false;
     private bool _isLoading = false;
-    private string? _message;
 
     protected override async Task OnInitializedAsync()
     {
-        _hasError = false;
         _isLoading = true;
         try
         {
@@ -67,8 +59,7 @@
         }
         catch (Exception ex)
         {
-            _hasError = true;
-            _message = ex.Message;
+            Snackbar.Add($"Fetching insurances failed: {ex.Message}", Severity.Warning);
         }
         finally
         {

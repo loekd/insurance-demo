@@ -1,0 +1,44 @@
+@extension_id = 830ead20d26e48139303cd63ffe38c54
+# @name login
+POST https://login.microsoftonline.com/xpiritinsurance.onmicrosoft.com/oauth2/v2.0/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{$dotenv %client_id}}&client_secret={{$dotenv %client_secret}}&scope=.default&grant_type=client_credentials&response_type=token
+
+@authToken = {{login.response.body.access_token}}
+
+
+###
+# @name getext
+https://graph.microsoft.com/v1.0/identity/userFlowAttributes
+Authorization: Bearer {{authToken}}
+
+
+###
+# @name getuserext
+https://graph.microsoft.com/beta/users/38009650-eeb8-4d4c-9d22-abd45beafe14?$select=extension_830ead20d26e48139303cd63ffe38c54_identityIsVerified
+Authorization: Bearer {{authToken}}
+
+@userIdVerified = {{getuserext.response.body.extension_830ead20d26e48139303cd63ffe38c54_identityIsVerified}}
+
+
+
+###
+# @name setuserextFalse
+PATCH https://graph.microsoft.com/beta/users/38009650-eeb8-4d4c-9d22-abd45beafe14
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "extension_830ead20d26e48139303cd63ffe38c54_identityIsVerified": false
+}
+
+###
+# @name setuserextTrue
+PATCH https://graph.microsoft.com/beta/users/38009650-eeb8-4d4c-9d22-abd45beafe14
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "extension_830ead20d26e48139303cd63ffe38c54_identityIsVerified": true
+}

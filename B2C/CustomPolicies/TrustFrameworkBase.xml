@@ -675,7 +675,8 @@
             <OutputClaim ClaimTypeReferenceId="givenName" />
             <OutputClaim ClaimTypeReferenceId="surname" />
             <OutputClaim ClaimTypeReferenceId="alternativeSecurityId" />
-            <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="AzureADB2C" />
+            <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="AzureADB2C" AlwaysUseDefaultValue="true" />
+            
           </OutputClaims>
           <IncludeTechnicalProfile ReferenceId="AAD-Common" />
         </TechnicalProfile>
@@ -995,6 +996,7 @@
             <Item Key="SignUpTarget">SignUpWithLogonEmailExchange</Item>
             <Item Key="setting.operatingMode">Email</Item>
             <Item Key="ContentDefinitionReferenceId">api.selfasserted</Item>
+            <Item Key="setting.enableRememberMe">True</Item>
           </Metadata>
           <IncludeInSso>false</IncludeInSso>
           <InputClaims>

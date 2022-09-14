@@ -21,6 +21,11 @@
           <Pattern RegularExpression="^[a-zA-Z0-9]+[a-zA-Z0-9_-]*$" HelpText="The username you provided is not valid. It must begin with an alphabet or number and can contain alphabets, numbers and the following symbols: _ -" />
         </Restriction>
       </ClaimType>
+      <ClaimType Id="extension_identityIsVerified">
+        <DisplayName>Identitiy verified</DisplayName>
+        <DataType>boolean</DataType>
+        <UserHelpText>Identity verified: true - Not verified: false</UserHelpText>
+      </ClaimType>
     </ClaimsSchema>
 
     <ContentDefinitions>
@@ -137,7 +142,7 @@
           <LocalizedString ElementType="ClaimType" ElementId="companyName" StringId="DisplayName">Company name</LocalizedString>
           <LocalizedString ElementType="ClaimType" ElementId="givenName" StringId="DisplayName">Given name</LocalizedString>
           <LocalizedString ElementType="ClaimType" ElementId="surName" StringId="DisplayName">Surname</LocalizedString>
-          <LocalizedString ElementType="UxElement" StringId="social_intro">Sign in or sign up</LocalizedString>
+          <LocalizedString ElementType="UxElement" StringId="social_intro">Federated sign-in options:</LocalizedString>
         </LocalizedStrings>
       </LocalizedResources>
 

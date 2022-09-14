@@ -11,23 +11,94 @@
     <PolicyId>B2C_1A_TrustFrameworkExtensions</PolicyId>
   </BasePolicy>
 
+  <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>Azure Active Directory</DisplayName>
+      <TechnicalProfiles>
+
+        <!-- The following technical profile is used to read data after user authenticates. -->
+        <TechnicalProfile Id="AAD-UserReadUsingObjectId">
+          <Metadata>
+            <Item Key="Operation">Read</Item>
+            <Item Key="RaiseErrorIfClaimsPrincipalDoesNotExist">true</Item>
+          </Metadata>
+          <IncludeInSso>false</IncludeInSso>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="objectId" Required="true" />
+          </InputClaims>
+          <OutputClaims>
+
+            <!-- Required claims -->
+            <OutputClaim ClaimTypeReferenceId="strongAuthenticationPhoneNumber" />
+
+            <!-- Optional claims -->
+            <OutputClaim ClaimTypeReferenceId="signInNames.emailAddress" />
+            <OutputClaim ClaimTypeReferenceId="displayName" />
+            <OutputClaim ClaimTypeReferenceId="otherMails" />
+            <OutputClaim ClaimTypeReferenceId="givenName" />
+            <OutputClaim ClaimTypeReferenceId="surname" />
+            <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="false" />
+
+          </OutputClaims>
+          <IncludeTechnicalProfile ReferenceId="AAD-Common" />
+        </TechnicalProfile>
+        <TechnicalProfile Id="AAD-UserReadUsingAlternativeSecurityId-NoIdp">
+          <Metadata>
+            <Item Key="Operation">Read</Item>
+            <Item Key="RaiseErrorIfClaimsPrincipalDoesNotExist">true</Item>
+            <Item Key="UserMessageIfClaimsPrincipalDoesNotExist">User does not exist. Please sign up before you can sign in.</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="AlternativeSecurityId" PartnerClaimType="alternativeSecurityId" Required="true" DefaultValue="{OIDC:LoginHint}" />
+          </InputClaims>
+          <OutputClaims>
+            <!-- Required claims -->
+            <OutputClaim ClaimTypeReferenceId="objectId" />
+            <OutputClaim ClaimTypeReferenceId="strongAuthenticationPhoneNumber" />
+            <!-- Optional claims -->
+            <OutputClaim ClaimTypeReferenceId="userPrincipalName" />
+            <OutputClaim ClaimTypeReferenceId="displayName" />
+            <OutputClaim ClaimTypeReferenceId="otherMails" />
+            <OutputClaim ClaimTypeReferenceId="givenName" />
+            <OutputClaim ClaimTypeReferenceId="surname" />
+            <OutputClaim ClaimTypeReferenceId="alternativeSecurityId" />
+            <!-- <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="AzureADB2C" /> -->
+            <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="false" />
+
+          </OutputClaims>
+          <IncludeTechnicalProfile ReferenceId="AAD-Common" />
+        </TechnicalProfile>
+
+        <TechnicalProfile Id="AAD-UserReadUsingAlternativeSecurityId-NoIdp-NoError">
+          <Metadata>
+            <Item Key="RaiseErrorIfClaimsPrincipalDoesNotExist">false</Item>
+          </Metadata>
+          <IncludeTechnicalProfile ReferenceId="AAD-UserReadUsingAlternativeSecurityId-NoIdp" />
+        </TechnicalProfile>
+    </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+
   <UserJourneys>
     <UserJourney Id="SignUpOrSignInMixed">
       <OrchestrationSteps>
+        <!-- Offer local signup / signin and federated providers -->
         <OrchestrationStep Order="1" Type="CombinedSignInAndSignUp" ContentDefinitionReferenceId="api.signuporsignin">
           <ClaimsProviderSelections>
+            <ClaimsProviderSelection ValidationClaimsExchangeId="LocalAccountSigninEmailExchange" />
+
             <ClaimsProviderSelection TargetClaimsExchangeId="Facebook-Exchange" />
             <ClaimsProviderSelection TargetClaimsExchangeId="DigiD-Exchange" />
             <ClaimsProviderSelection TargetClaimsExchangeId="Xpirit-Exchange" />
             
-            <!--Sample: Adding the sign-in with email button-->
-            <ClaimsProviderSelection TargetClaimsExchangeId="SignIn-WithEmail" />
-            <ClaimsProviderSelection TargetClaimsExchangeId="SignUp-WithEmail" />
           </ClaimsProviderSelections>
+          <ClaimsExchanges>
+            <ClaimsExchange Id="LocalAccountSigninEmailExchange" TechnicalProfileReferenceId="SelfAsserted-LocalAccountSignin-Email" />
+          </ClaimsExchanges>
         </OrchestrationStep>
 
         <!-- Check if the user has selected to sign in using one of the social providers -->
-        <OrchestrationStep Order="2" Type="ClaimsExchange" ContentDefinitionReferenceId="api.signuporsignin">
+        <OrchestrationStep Order="2" Type="ClaimsExchange">
           <Preconditions>
             <Precondition Type="ClaimsExist" ExecuteActionsIf="true">
               <Value>objectId</Value>
@@ -38,14 +109,11 @@
             <ClaimsExchange Id="Facebook-Exchange" TechnicalProfileReferenceId="Facebook-OIDC" />
             <ClaimsExchange Id="DigiD-Exchange" TechnicalProfileReferenceId="DigiD-OIDC" />
             <ClaimsExchange Id="Xpirit-Exchange" TechnicalProfileReferenceId="AADXpirit-OIDC" />
-            
-            <!--Sample: the sign-in with email claims exchange-->
-            <ClaimsExchange Id="SignIn-WithEmail" TechnicalProfileReferenceId="SelfAsserted-LocalAccountSignin-Email" />
-            <ClaimsExchange Id="SignUp-WithEmail" TechnicalProfileReferenceId="LocalAccountSignUpWithLogonEmail" />
           </ClaimsExchanges>
-        </OrchestrationStep>
+        </OrchestrationStep>        
 
-        <!-- For social IDP authentication, attempt to find the user account in the directory. -->
+
+        <!-- For federated IDP authentication, attempt to find the user account in the directory. -->
         <OrchestrationStep Order="3" Type="ClaimsExchange">
           <Preconditions>
             <Precondition Type="ClaimEquals" ExecuteActionsIf="true">
@@ -55,7 +123,7 @@
             </Precondition>
           </Preconditions>
           <ClaimsExchanges>
-            <ClaimsExchange Id="AADUserReadUsingAlternativeSecurityId" TechnicalProfileReferenceId="AAD-UserReadUsingAlternativeSecurityId-NoError" />
+            <ClaimsExchange Id="AADUserReadUsingAlternativeSecurityId" TechnicalProfileReferenceId="AAD-UserReadUsingAlternativeSecurityId-NoIdp-NoError" />
           </ClaimsExchanges>
         </OrchestrationStep>
 
@@ -88,6 +156,7 @@
             <ClaimsExchange Id="AADUserReadWithObjectId" TechnicalProfileReferenceId="AAD-UserReadUsingObjectId" />
           </ClaimsExchanges>
         </OrchestrationStep>
+
         <!-- The previous step (SelfAsserted-Social) could have been skipped if there were no attributes to collect 
              from the user. So, in that case, create the user in the directory if one does not already exist 
              (verified using objectId which would be set from the last step if account was created in the directory. -->

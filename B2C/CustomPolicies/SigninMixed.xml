@@ -12,9 +12,23 @@
     <PolicyId>B2C_1A_TrustFramework_Mixed</PolicyId>
   </BasePolicy>
 
+  <!-- <ClaimsProviders>
+    <ClaimsProvider>
+      <DisplayName>Local Account</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="SelfAsserted-LocalAccountSignin-Email">
+          <Metadata>
+            <Item Key="setting.enableRememberMe">True</Item>
+          </Metadata>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders> -->
+
   <RelyingParty>
     <DefaultUserJourney ReferenceId="SignUpOrSignInMixed" />
     <UserJourneyBehaviors>
+      <SingleSignOn Scope="Tenant" KeepAliveInDays="30"/>
       <JourneyInsights TelemetryEngine="ApplicationInsights" InstrumentationKey="6b9f5aa9-ec85-46c9-a11e-afbd0498e497"
         DeveloperMode="true"
         ClientEnabled="true"
@@ -31,7 +45,8 @@
         <OutputClaim ClaimTypeReferenceId="surname" />
         <OutputClaim ClaimTypeReferenceId="email" />
         <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub"/>
-        <OutputClaim ClaimTypeReferenceId="identityProvider" PartnerClaimType="idp" />
+        <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="AzureADB2C" PartnerClaimType="idp" />
+        <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="false" PartnerClaimType="idVerified" />
       </OutputClaims>
       <SubjectNamingInfo ClaimType="sub" />
     </TechnicalProfile>

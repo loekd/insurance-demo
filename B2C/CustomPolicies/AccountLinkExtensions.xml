@@ -93,6 +93,7 @@
         <DataType>string</DataType>
         <UserHelpText>Define whether the user is link or unlink an account</UserHelpText>
       </ClaimType>
+
     </ClaimsSchema>
      
     <ClaimsTransformations>  
@@ -201,6 +202,7 @@
           <OutputClaim ClaimTypeReferenceId="issuersToUnlink" TransformationClaimType="issuersCollection" />
         </OutputClaims>
       </ClaimsTransformation>
+
     </ClaimsTransformations>
   </BuildingBlocks>
 
@@ -288,6 +290,7 @@
             <PersistedClaim ClaimTypeReferenceId="otherMails"/>
             <PersistedClaim ClaimTypeReferenceId="givenName"/>
             <PersistedClaim ClaimTypeReferenceId="surname"/>
+
           </PersistedClaims>
           <OutputClaims>
             <OutputClaim ClaimTypeReferenceId="objectId"/>
@@ -315,10 +318,12 @@
           <PersistedClaims>
             <PersistedClaim ClaimTypeReferenceId="objectId" />
             <PersistedClaim ClaimTypeReferenceId="userIdentities" />
+            <PersistedClaim ClaimTypeReferenceId="extension_identityIsVerified"  />
           </PersistedClaims>
           <OutputClaims>
             <OutputClaim ClaimTypeReferenceId="objectId" />
             <OutputClaim ClaimTypeReferenceId="userIdentities" />
+            <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified"  />
           </OutputClaims>
           <OutputClaimsTransformations>
             <OutputClaimsTransformation ReferenceId="ExtractIssuers" />
@@ -448,6 +453,7 @@
             <OutputClaim ClaimTypeReferenceId="issuerUserIdToLink" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="issuerToLink" DefaultValue="DigiD" AlwaysUseDefaultValue="true" />
             <OutputClaim ClaimTypeReferenceId="linkOrUnlink" DefaultValue="link" AlwaysUseDefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="true" AlwaysUseDefaultValue="true" />
           </OutputClaims>
           <OutputClaimsTransformations>
               <OutputClaimsTransformation ReferenceId="CreateUserIdentityToLink" />
@@ -468,6 +474,7 @@
           <OutputClaims>
             <OutputClaim ClaimTypeReferenceId="issuerToUnlink" DefaultValue="DigiD" AlwaysUseDefaultValue="true" />
             <OutputClaim ClaimTypeReferenceId="linkOrUnlink" DefaultValue="unlink" AlwaysUseDefaultValue="true" />
+            <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="false" AlwaysUseDefaultValue="true" />
           </OutputClaims>
           <IncludeTechnicalProfile ReferenceId="SocialAccount-Unlink" />
         </TechnicalProfile>
@@ -568,6 +575,7 @@
         <TechnicalProfile Id="SelfAsserted-LocalAccountSignin-Email">
           <Metadata>
             <Item Key="setting.showSignupLink">false</Item>
+            <Item Key="setting.enableRememberMe">True</Item>
           </Metadata>
         </TechnicalProfile>
       </TechnicalProfiles>

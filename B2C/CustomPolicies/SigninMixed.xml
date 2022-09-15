@@ -12,6 +12,14 @@
     <PolicyId>B2C_1A_TrustFramework_Mixed</PolicyId>
   </BasePolicy>
 
+  <BuildingBlocks>
+    <ClaimsSchema>
+      <ClaimType Id="policy">
+        <DataType>string</DataType>
+      </ClaimType>
+    </ClaimsSchema>
+  </BuildingBlocks>
+
   <!-- <ClaimsProviders>
     <ClaimsProvider>
       <DisplayName>Local Account</DisplayName>
@@ -47,6 +55,7 @@
         <OutputClaim ClaimTypeReferenceId="objectId" PartnerClaimType="sub"/>
         <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="AzureADB2C" PartnerClaimType="idp" />
         <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="false" PartnerClaimType="idVerified" />
+        <OutputClaim ClaimTypeReferenceId="policy" DefaultValue="{Policy:PolicyId}" AlwaysUseDefaultValue="true" PartnerClaimType="tfp"/>
       </OutputClaims>
       <SubjectNamingInfo ClaimType="sub" />
     </TechnicalProfile>

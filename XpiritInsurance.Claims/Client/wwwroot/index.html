@@ -12,6 +12,38 @@
     <link href="XpiritInsurance.Claims.Client.styles.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <script language="ecmascript">
+        function getIdToken() {
+            return getToken("IdToken");
+        }
+
+        function getAccessToken() {
+            return getToken("AccessToken");
+        }
+
+        function getRefreshToken() {
+            return getToken("RefreshToken");
+        }
+
+        function getToken(tokenType) {
+
+            var keys = Object.keys(sessionStorage);
+            for (var i = 0; i < keys.length; i++) {
+                var entry = sessionStorage.getItem(sessionStorage.key(i));
+                try {
+                    var json = JSON.parse(entry);
+
+                    if (json.credentialType == tokenType) {
+                        return json.secret;
+                    }
+                } catch {
+                    //ignore
+                }
+            }
+
+            return null;
+        }
+    </script>
 </head>
 
 <body>

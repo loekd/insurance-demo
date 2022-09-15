@@ -1,0 +1,100 @@
+﻿@page "/tokens"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using XpiritInsurance.Sales.Client.Models
+@using System.IdentityModel.Tokens.Jwt;
+@using Newtonsoft.Json;
+
+@attribute [Authorize]
+@inject HttpClient Http
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+
+<h1>Tokens</h1>
+
+<div class="contentDiv">
+
+    <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.IdToken); }">Show ID token</MudButton>
+    <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.AccessToken); }">Show Access token</MudButton>
+    <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.RefreshToken); }">Show Refresh token</MudButton>
+    <MudCheckBox @bind-Checked="@_decodeTokens">Decode token</MudCheckBox>
+
+    @if (_token != null)
+    {
+        <MudTextField @bind-Value="_token" ReadOnly="true" Label="token" Lines="20" />
+        <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => _token = null">Clear</MudButton>
+    }
+
+</div>
+
+
+@code {
+    private bool _decodeTokens = false;
+    private MarkupString? _token;
+    private enum TokenType
+    {
+        IdToken = 0,
+        AccessToken = 1,
+        RefreshToken = 2
+    }
+
+    /// <summary>
+    /// Gets the raw JWT id_token.
+    /// </summary>
+    /// <returns></returns>
+    private async Task<MarkupString?> GetJwtToken(TokenType tokenType)
+    {
+        string token;
+        string method;
+        switch (tokenType)
+        {
+            case TokenType.AccessToken:
+                method = "getAccessToken";
+                break;
+
+            case TokenType.IdToken:
+                method = "getIdToken";
+                break;
+
+            default:
+                method = "getRefreshToken";
+                break;
+        }
+
+        // Uses MSAL when working with AAD only
+        token = await this.JSRuntime.InvokeAsync<string>(method);
+
+        if (token == null)
+        {
+            Snackbar.Add($"Token fetch failed", Severity.Warning);
+            return null;
+        }
+
+        if (_decodeTokens)
+        {
+            JwtSecurityToken parsed = new JwtSecurityToken(token);
+            token = parsed.ToString();
+
+            int index = token.IndexOf("}.{");
+            if (index > 0)
+            {
+                string kid = token.Substring(0, index + 1);
+                string body = token.Substring(index + 2);
+
+                kid = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(kid), Formatting.Indented);
+                body = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(body), Formatting.Indented);
+                return (MarkupString)$"{kid}\n.\n{body}";
+            }
+            else
+            {
+                token = JsonConvert.SerializeObject(JsonConvert.DeserializeObject(token.Substring(0, token.Length-1)), Formatting.Indented);
+                return (MarkupString)$"{token}\n.";
+            }
+
+        }
+        else
+        {
+            return (MarkupString)token;
+        }
+    }
+}

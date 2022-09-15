@@ -2,9 +2,12 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using XpiritInsurance.Sales.Client.Models
+@using System.IdentityModel.Tokens.Jwt;
+
 @attribute [Authorize]
 @inject HttpClient Http
 @inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
 
 <h1>Quotes</h1>
 
@@ -37,7 +40,6 @@
             }
         </tbody>
     </MudSimpleTable>
-
 </div>
 
 @if (_isLoading)
@@ -49,8 +51,7 @@
     private List<Insurance> _insurances = new();
     private Dictionary<string, decimal?> _quotes = new();
     private bool _isLoading = false;
-
-
+    
     protected override Task OnInitializedAsync()
     {
         return LoadData();
@@ -137,7 +138,7 @@
                 var response = await Http.PostAsJsonAsync<Quote>($"insurance", new Quote("", it, amount.Value));
                 response.EnsureSuccessStatusCode();
                 Snackbar.Add($"Bought {insuranceType} insurance for {amount.Value}€ per month.", Severity.Info);
-                
+
                 //refresh list
                 await LoadData();
             }
@@ -159,4 +160,5 @@
             _isLoading = false;
         }
     }
+
 }

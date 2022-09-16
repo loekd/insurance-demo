@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace XpiritInsurance.Claims.Shared
+namespace XpiritInsurance.DamageClaims.Shared
 {
     public record Insurance(InsuranceType InsuranceType, decimal AmountPerMonth);
     public enum InsuranceType { House, Boat, Health }

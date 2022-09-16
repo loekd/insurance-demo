@@ -8,11 +8,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{E1251F63-BAC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sales", "Sales", "{099025A8-F389-460A-9375-77419F44D8B8}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Claims", "Claims", "{8D86AEAE-8872-4881-8B33-D0276916946C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DamageClaims", "DamageClaims", "{8D86AEAE-8872-4881-8B33-D0276916946C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpiritInsurance.Claims.Client", "XpiritInsurance.Claims\Client\XpiritInsurance.Claims.Client.csproj", "{5B9E1F0B-88CD-4E92-8915-10E0AB800458}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpiritInsurance.DamageClaims.Client", "XpiritInsurance.DamageClaims\Client\XpiritInsurance.DamageClaims.Client.csproj", "{5B9E1F0B-88CD-4E92-8915-10E0AB800458}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpiritInsurance.Claims.Server", "XpiritInsurance.Claims\Server\XpiritInsurance.Claims.Server.csproj", "{EC57567F-9AFC-4D9D-A6DB-07FE06498EDE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpiritInsurance.DamageClaims.Server", "XpiritInsurance.DamageClaims\Server\XpiritInsurance.DamageClaims.Server.csproj", "{EC57567F-9AFC-4D9D-A6DB-07FE06498EDE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "XpiritInsurance.Sales.Client", "XpiritInsurance.Sales\Client\XpiritInsurance.Sales.Client.csproj", "{5D58180C-5599-4C28-A53E-4E9C0AD70F7A}"
 EndProject

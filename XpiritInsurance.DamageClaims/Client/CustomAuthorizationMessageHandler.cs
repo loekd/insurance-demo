@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components;
 
-namespace XpiritInsurance.Claims.Client
+namespace XpiritInsurance.DamageClaims.Client
 {
     public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
     {

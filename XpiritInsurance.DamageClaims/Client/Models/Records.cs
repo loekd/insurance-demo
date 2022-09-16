@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace XpiritInsurance.Claims.Client.Models
+namespace XpiritInsurance.DamageClaims.Client.Models
 {
     public record Insurance(InsuranceType InsuranceType, decimal AmountPerMonth);
     public enum InsuranceType { House, Boat, Health }

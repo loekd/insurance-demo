@@ -14,12 +14,12 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped<CustomAuthorizationMessageHandler>();
-//builder.Services.AddHttpClient("XpiritInsurance.Claims.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
-builder.Services.AddHttpClient("XpiritInsurance.Claims.ServerAPI", client => client.BaseAddress = new Uri("https://localhost:7008/"))
+//builder.Services.AddHttpClient("XpiritInsurance.DamageClaims.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+builder.Services.AddHttpClient("XpiritInsurance.DamageClaims.ServerAPI", client => client.BaseAddress = new Uri("https://localhost:7008/"))
     .AddHttpMessageHandler<CustomAuthorizationMessageHandler>();
 
 // Supply HttpClient instances that include access tokens when making requests to the server project
-builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("XpiritInsurance.Claims.ServerAPI"));
+builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("XpiritInsurance.DamageClaims.ServerAPI"));
 
 builder.Services.AddMsalAuthentication(options =>
 {

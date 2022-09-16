@@ -18,6 +18,10 @@
                 case InsuranceType.Health:
                     amount = new Random(Guid.NewGuid().GetHashCode()).Next(79, 150);
                     break;
+                case InsuranceType.Glass:
+                    amount = new Random(Guid.NewGuid().GetHashCode()).Next(10, 31);
+                    break;
+
             }
 
             return Task.FromResult<decimal>(amount);

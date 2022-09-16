@@ -9,7 +9,7 @@
         {
             { "user 01", new Insurance(InsuranceType.Boat, 15) },
             { "user 02", new Insurance(InsuranceType.House, 50) },
-            { "user 03", new Insurance(InsuranceType.Health, 210) }
+            { "user 03", new Insurance(InsuranceType.Car, 31) }
             //add some seed data
         };
 

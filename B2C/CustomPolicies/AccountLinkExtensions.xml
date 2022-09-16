@@ -94,6 +94,12 @@
         <UserHelpText>Define whether the user is link or unlink an account</UserHelpText>
       </ClaimType>
 
+      <ClaimType Id="prompt">
+        <DisplayName>prompt</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Special parameter passed to indicate target prompt.</UserHelpText>
+      </ClaimType>
+
     </ClaimsSchema>
      
     <ClaimsTransformations>  
@@ -449,6 +455,9 @@
             <Item Key="ClaimTypeOnWhichToEnable">issuers</Item>
             <Item Key="ClaimValueOnWhichToEnable">DigiD</Item>
           </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="prompt" PartnerClaimType="prompt" DefaultValue="login" AlwaysUseDefaultValue="true" />
+          </InputClaims>
           <OutputClaims>
             <OutputClaim ClaimTypeReferenceId="issuerUserIdToLink" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="issuerToLink" DefaultValue="DigiD" AlwaysUseDefaultValue="true" />
@@ -491,9 +500,13 @@
         <TechnicalProfile Id="Facebook-OIDC-Link">
           <DisplayName>Link Facebook</DisplayName>       
           <Metadata>
+            <Item Key="ProviderName">https://loek.eu.auth0.com/</Item>
             <Item Key="ClaimTypeOnWhichToEnable">issuers</Item>
             <Item Key="ClaimValueOnWhichToEnable">Facebook</Item>
           </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="prompt" PartnerClaimType="prompt" DefaultValue="login" AlwaysUseDefaultValue="true" />
+          </InputClaims>
           <OutputClaims>
             <OutputClaim ClaimTypeReferenceId="issuerUserIdToLink" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="issuerToLink" DefaultValue="Facebook" AlwaysUseDefaultValue="true" />
@@ -536,6 +549,9 @@
             <Item Key="ClaimTypeOnWhichToEnable">issuers</Item>
             <Item Key="ClaimValueOnWhichToEnable">Xpirit</Item>
           </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="prompt" PartnerClaimType="prompt" DefaultValue="login" AlwaysUseDefaultValue="true" />
+          </InputClaims>
           <OutputClaims>
             <OutputClaim ClaimTypeReferenceId="issuerUserIdToLink" PartnerClaimType="oid" />
             <OutputClaim ClaimTypeReferenceId="issuerToLink" DefaultValue="Xpirit" AlwaysUseDefaultValue="true" />

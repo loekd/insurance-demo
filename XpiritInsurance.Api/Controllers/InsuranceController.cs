@@ -39,6 +39,22 @@
         public async Task<IActionResult> BuyInsurance([FromBody] Quote quote)
         {
             string userName = HttpContext.User.GetDisplayName() ?? "unknown";
+
+            //assert that user is identified for health insurance, by checking a custom claim named 'idVerified'
+            //this is set to 'true' when a 'DigiD' identity is connected to the current user account.
+            if (quote.InsuranceType == InsuranceType.Health)
+            {
+                bool idVerified = HttpContext.User.Claims.SingleOrDefault(c => c.Type == "idVerified")?.Value == "true";
+                if (!idVerified)
+                {
+                    return Unauthorized(new ErrorViewModel
+                    {
+                        RequestId = HttpContext.TraceIdentifier,
+                        Message = $"Identity not verified for user {userName}. Connect DigiD identity to enable purchase of Health insurance."
+                    });
+                }
+            }
+
             decimal amount = quote.AmountPerMonth;
             if (amount < 5 || amount > 150)
             {

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "XpiritInsurance.DaprLauncher": {
+      "commandName": "Project",
+      "commandLineArgs": "--create-sidecar-process --monitored-process-id 5528 --monitored-process-port 5142"
+    }
+  }
+}

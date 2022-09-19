@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols;
 using System.IdentityModel.Tokens.Jwt;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System;
 
 namespace XpiritInsurance.Api;
 
@@ -16,6 +18,26 @@ public class Program
 
     public static void Main(string[] args)
     {
+        if (args.Any(a=> a.Contains("dapr")))
+        {
+            var thisProces = Process.GetCurrentProcess();
+
+            var psi = new ProcessStartInfo("dotnet")
+            {
+                UseShellExecute = false,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                Arguments = $"tool run daprlauncher --create-sidecar-process --monitored-process-id {thisProces.Id} --monitored-process-port 5142",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+            };
+            var launcher = Process.Start(psi)!;
+            launcher.OutputDataReceived += (s, e) => Console.WriteLine($"Launcher: {e.Data}", ConsoleColor.Blue);
+            launcher.ErrorDataReceived += (s, e) => Console.WriteLine($"Launcher: {e.Data}", ConsoleColor.Red);
+            launcher.BeginErrorReadLine();
+            launcher.BeginOutputReadLine();
+        }
+
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
@@ -27,7 +49,7 @@ public class Program
                     {
                         builder.Configuration.Bind("AzureAdB2C", options);
                         options.TokenValidationParameters.NameClaimType = "name";
-                        options.TokenValidationParameters.ValidateIssuerSigningKey = false;
+                        
                         options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
                         {
                             //use cached info from metadata endpoint to fetch key info for signature validation

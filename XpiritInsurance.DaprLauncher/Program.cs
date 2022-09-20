@@ -140,20 +140,20 @@ namespace XpiritInsurance.DaprLauncher
             var psi = new ProcessStartInfo(Environment.ExpandEnvironmentVariables(" %SystemDrive%/dapr/dapr.exe"))
             {
                 UseShellExecute = false,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                CreateNoWindow = true,
+                //WindowStyle = ProcessWindowStyle.Hidden,
+                //CreateNoWindow = true,
                 Arguments = $"run --app-id {appId} --app-port {appPort} --dapr-http-port {daprHttpPort} --dapr-grpc-port {daprGrpcPort}",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
+                //RedirectStandardOutput = true,
+                //RedirectStandardError = true,
             };
             try
             {
                 process = Process.Start(psi)!;
-                process.OutputDataReceived += (s, e) => Console.WriteLine($"DAPR: {e.Data}", ConsoleColor.Blue);
-                process.ErrorDataReceived += (s, e) => Console.WriteLine($"DAPR: {e.Data}", ConsoleColor.Red);
-                process.BeginErrorReadLine();
-                process.BeginOutputReadLine();
-                Console.Error.WriteLine("Launched side car pid:{0}", process.Id);
+                //process.OutputDataReceived += (s, e) => Console.WriteLine($"DAPR: {e.Data}", ConsoleColor.Blue);
+                //process.ErrorDataReceived += (s, e) => Console.WriteLine($"DAPR: {e.Data}", ConsoleColor.Red);
+                //process.BeginErrorReadLine();
+                //process.BeginOutputReadLine();
+                Console.WriteLine("Launched side car pid:{0}", process.Id);
 
                 return true;
             }

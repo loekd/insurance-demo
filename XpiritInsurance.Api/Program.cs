@@ -25,17 +25,9 @@ public class Program
             var psi = new ProcessStartInfo("dotnet")
             {
                 UseShellExecute = false,
-                WindowStyle = ProcessWindowStyle.Hidden,
-                CreateNoWindow = true,
                 Arguments = $"tool run daprlauncher --create-sidecar-process --monitored-process-id {thisProces.Id} --monitored-process-port 5142",
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
             };
             var launcher = Process.Start(psi)!;
-            launcher.OutputDataReceived += (s, e) => Console.WriteLine($"Launcher: {e.Data}", ConsoleColor.Blue);
-            launcher.ErrorDataReceived += (s, e) => Console.WriteLine($"Launcher: {e.Data}", ConsoleColor.Red);
-            launcher.BeginErrorReadLine();
-            launcher.BeginOutputReadLine();
         }
 
         var builder = WebApplication.CreateBuilder(args);
@@ -49,13 +41,12 @@ public class Program
                     {
                         builder.Configuration.Bind("AzureAdB2C", options);
                         options.TokenValidationParameters.NameClaimType = "name";
-                        
+                        options.TokenValidationParameters.ValidateIssuerSigningKey = true;
                         options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
                         {
                             //use cached info from metadata endpoint to fetch key info for signature validation
                             var tfpClaim = ((JwtSecurityToken)securityToken).Claims.Single(c => c.Type == "tfp");
-                            string stsDiscoveryEndpoint = $"https://xpiritinsurance.b2clogin.com/xpiritinsurance.onmicrosoft.com/{tfpClaim.Value}/v2.0/.well-known/openid-configuration";
-
+                            string stsDiscoveryEndpoint = $"https://{builder.Configuration["AzureAdB2C:TenantName"]}.b2clogin.com/{builder.Configuration["AzureAdB2C:Domain"]}/{tfpClaim.Value}/v2.0/.well-known/openid-configuration";
                             ConfigurationManager<OpenIdConnectConfiguration> configManager = configurationManagers.GetOrAdd(kid, key => new(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever()));
                             var config = configManager.GetConfigurationAsync(CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();
 

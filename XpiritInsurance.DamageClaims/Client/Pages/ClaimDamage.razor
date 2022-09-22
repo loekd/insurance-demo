@@ -100,7 +100,7 @@
             _isLoading = true;
             _damageClaim = _damageClaim! with { Amount = _claimAmount };
 
-            var response = await Http.PostAsJsonAsync<DamageClaim>($"damageclaim", _damageClaim);
+            var response = await Http.PostAsJsonAsync<DamageClaim>($"damageclaims", _damageClaim);
             response.EnsureSuccessStatusCode();
             Snackbar.Add($"Claimed damage for {_damageClaim.InsuranceType} with amount {_claimAmount}€.", Severity.Info);
 
@@ -132,13 +132,13 @@
         _isLoading = true;
         try
         {
-            var insurances = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurance");
+            var insurances = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurances");
             if (insurances != null)
             {
                 _insurances.Clear();
                 _insurances.AddRange(insurances);
             }
-            var existingDamageClaims = await Http.GetFromJsonAsync<IEnumerable<DamageClaim>>("damageclaim");
+            var existingDamageClaims = await Http.GetFromJsonAsync<IEnumerable<DamageClaim>>("damageclaims");
             if (existingDamageClaims != null)
             {
                 _existingDamageClaims.Clear();

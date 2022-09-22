@@ -12,13 +12,13 @@
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes")]
     [ApiController]
     [Route("[controller]")]
-    public class InsuranceController : ControllerBase
+    public class InsurancesController : ControllerBase
     {
-        private readonly ILogger<InsuranceController> _logger;
-        private readonly QuoteAmountService _quoteAmountService;
+        private readonly ILogger<InsurancesController> _logger;
+        private readonly QuoteService _quoteAmountService;
         private readonly InsuranceService _insuranceService;
 
-        public InsuranceController(ILogger<InsuranceController> logger, QuoteAmountService quoteAmountService, InsuranceService insuranceService)
+        public InsurancesController(ILogger<InsurancesController> logger, QuoteService quoteAmountService, InsuranceService insuranceService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _quoteAmountService = quoteAmountService ?? throw new ArgumentNullException(nameof(quoteAmountService));
@@ -30,7 +30,7 @@
         public async Task<IActionResult> GetInsurances()
         {
             string userName = HttpContext.User.GetDisplayName() ?? "unknown";
-            var insurances = await _insuranceService.GetInsurances(userName);
+            var insurances = await _insuranceService.GetExistingInsurances(userName);
             return Ok(insurances);
         }
 
@@ -55,25 +55,26 @@
                 }
             }
 
-            decimal amount = quote.AmountPerMonth;
-            if (amount < 5 || amount > 150)
+            var existingQuote = await _quoteAmountService.GetExistingQuote(quote.Id);
+
+            if (existingQuote != null)
             {
-                amount = await _quoteAmountService.CalculateQuote(userName, quote.InsuranceType);
+                await _insuranceService.AddInsurance(userName, existingQuote);
+                await _quoteAmountService.DeleteQuote(userName, existingQuote);
+
+                _logger.LogInformation("Sold insurance {InsuranceType} to user {UserName} for {AmountPerMonth}", quote.InsuranceType, userName, existingQuote.AmountPerMonth);
+                return Ok();
             }
-            await _insuranceService.AddInsurance(quote with { UserName = userName, AmountPerMonth = amount });
+            else
+            {
+                _logger.LogWarning("Unable to find existing quote for {InsuranceType}, user {UserName} with id {Id}", quote.InsuranceType, userName, quote.Id);
 
-            _logger.LogInformation("Sold insurance {InsuranceType} to user {UserName} for {AmountPerMonth}", quote.InsuranceType, userName, amount);
-            return Ok();
-        }
-
-        [ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(Quote))]
-        [HttpGet("quote")]
-        public async Task<IActionResult> CalculateQuote([FromQuery]InsuranceType insuranceType)
-        {
-            string userName = HttpContext.User.GetDisplayName() ?? "unknown";
-            decimal amount = await _quoteAmountService.CalculateQuote(userName, insuranceType);
-
-            return Ok(new Quote(userName, insuranceType, amount));
+                return BadRequest(new ErrorViewModel
+                {
+                    RequestId = HttpContext.TraceIdentifier,
+                    Message = $"Quote {quote.Id} not found"
+                });
+            }
         }
     }
 }

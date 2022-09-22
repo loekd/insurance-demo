@@ -22,20 +22,25 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var quote in _quotes)
+            @foreach (var quote in _quoteTypes)
             {
                 <tr>
                     <td>@quote.Key</td>
                     <td>@quote.Value</td>
-                    @if (TryGetInsurance(quote.Key) == null)
+                    @if (TryGetExistingInsurance(quote.Key) != null)
                     {
-                        <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
+                        <td />
+                        <td>Insured for @(GetInsuranceMonthlyDue(quote.Key))€ per month</td>
+                    }
+                    else if (TryGetExistingQuote(quote.Key) != null)
+                    {
+                        <td>Quote for @(GetQuoteMonthlyDue(quote.Key))€ per month</td>
                         <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => Buy(quote.Key)">Buy this</MudButton></td>
                     }
                     else
                     {
-                        <td/>
-                        <td>Insured for @(GetInsuranceMonthlyDue(quote.Key))€ per month</td>
+                        <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
+                        <td />
                     }
                 </tr>
             }
@@ -50,9 +55,10 @@
 
 @code {
     private List<Insurance> _insurances = new();
-    private Dictionary<string, decimal?> _quotes = new();
+    private List<Quote> _quotes = new();
+    private Dictionary<string, decimal?> _quoteTypes = new();
     private bool _isLoading = false;
-    
+
     protected override Task OnInitializedAsync()
     {
         return LoadData();
@@ -62,19 +68,26 @@
     {
         _isLoading = true;
 
-        _quotes.Clear();
+        _quoteTypes.Clear();
         foreach (var insuranceType in Enum.GetNames(typeof(InsuranceType)))
         {
-            _quotes.Add(insuranceType, null);
+            _quoteTypes.Add(insuranceType, null);
         }
         try
         {
 
-            var data = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurance");
+            var data = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurances");
             if (data != null)
             {
                 _insurances.Clear();
                 _insurances.AddRange(data);
+            }
+
+            var quotes = await Http.GetFromJsonAsync<IEnumerable<Quote>>("quotes");
+            if (quotes != null)
+            {
+                _quotes.Clear();
+                _quotes.AddRange(quotes);
             }
         }
         catch (AccessTokenNotAvailableException exception)
@@ -91,10 +104,16 @@
         }
     }
 
-    private Insurance? TryGetInsurance(string insuranceType)
+    private Insurance? TryGetExistingInsurance(string insuranceType)
     {
         var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
         return _insurances.SingleOrDefault(dc => dc.InsuranceType == it);
+    }
+
+    private Quote? TryGetExistingQuote(string insuranceType)
+    {
+        var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
+        return _quotes.SingleOrDefault(dc => dc.InsuranceType == it);
     }
 
     private decimal GetInsuranceMonthlyDue(string insuranceType)
@@ -104,14 +123,22 @@
         return existing.AmountPerMonth;
     }
 
+    private decimal GetQuoteMonthlyDue(string insuranceType)
+    {
+        var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
+        var existing = _quotes.Single(dc => dc.InsuranceType == it);
+        return existing.AmountPerMonth;
+    }
+
     private async Task GetQuote(string insuranceType)
     {
         try
         {
             _isLoading = true;
+            var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
+            var quote = await Http.PostAsJsonAsync<Quote>($"quotes", new Quote("", it, 0m, Guid.NewGuid()));
 
-            var quote = await Http.GetFromJsonAsync<Quote>($"insurance/quote?insuranceType={insuranceType}");
-            if (quote != null) _quotes[insuranceType] = quote.AmountPerMonth;
+            await LoadData();
         }
         catch (AccessTokenNotAvailableException exception)
         {
@@ -134,11 +161,12 @@
             _isLoading = true;
 
             var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
-            if (_quotes.TryGetValue(insuranceType, out var amount) && amount.HasValue)
+            var quote = _quotes.SingleOrDefault(q => q.InsuranceType == it);
+            if (quote != null)
             {
-                var response = await Http.PostAsJsonAsync<Quote>($"insurance", new Quote("", it, amount.Value));
+                var response = await Http.PostAsJsonAsync<Quote>($"insurances", quote);
                 response.EnsureSuccessStatusCode();
-                Snackbar.Add($"Bought {insuranceType} insurance for {amount.Value}€ per month.", Severity.Info);
+                Snackbar.Add($"Bought {insuranceType} insurance.", Severity.Info);
 
                 //refresh list
                 await LoadData();

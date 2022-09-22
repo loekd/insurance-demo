@@ -2,6 +2,6 @@
 
 namespace XpiritInsurance.Api.Models
 {
-    public record DamageClaim(string? UserName, InsuranceType InsuranceType, decimal Amount);
+    public record DamageClaim(string? UserName, InsuranceType InsuranceType, decimal Amount, Guid Id);
 
 }

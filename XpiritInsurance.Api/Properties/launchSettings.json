@@ -3,10 +3,12 @@
     "https": {
       "commandName": "Project",
       "commandLineArgs": "-dapr",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "https://localhost:7008/swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DAPR_HTTP_PORT": "3501",
+        "DAPR_GRPC_PORT": "50002"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7008;http://localhost:5142"

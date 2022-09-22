@@ -1,4 +1,4 @@
 ﻿namespace XpiritInsurance.Api.Models
 {
-    public record Quote(string UserName, InsuranceType InsuranceType, decimal AmountPerMonth);
+    public record Quote(string UserName, InsuranceType InsuranceType, decimal AmountPerMonth, Guid Id);
 }

@@ -25,7 +25,7 @@ public class Program
             var psi = new ProcessStartInfo("dotnet")
             {
                 UseShellExecute = false,
-                Arguments = $"tool run daprlauncher --create-sidecar-process --monitored-process-id {thisProces.Id} --monitored-process-port 5142",
+                Arguments = $"tool run daprlauncher --create-sidecar-process --monitored-process-id {thisProces.Id} --app-port 5142 --components-path {Path.Combine(Environment.CurrentDirectory, "components")}",
             };
             var launcher = Process.Start(psi)!;
         }
@@ -67,13 +67,14 @@ public class Program
                               });
         });
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddDapr();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
         //Add mock services
-        builder.Services.AddSingleton<Services.QuoteAmountService>();
+        builder.Services.AddSingleton<Services.QuoteService>();
         builder.Services.AddSingleton<Services.InsuranceService>();
         builder.Services.AddSingleton<Services.DamageClaimService>();
 
@@ -84,6 +85,8 @@ public class Program
 
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseCloudEvents();
+        app.MapSubscribeHandler();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

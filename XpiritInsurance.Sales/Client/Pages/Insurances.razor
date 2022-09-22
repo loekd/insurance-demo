@@ -50,7 +50,7 @@
         _isLoading = true;
         try
         {
-            var data = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurance");
+            var data = await Http.GetFromJsonAsync<IEnumerable<Insurance>>("insurances");
             if (data != null) _insurances.AddRange(data);
         }
         catch (AccessTokenNotAvailableException exception)

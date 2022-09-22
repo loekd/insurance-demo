@@ -1,39 +1,44 @@
-﻿namespace XpiritInsurance.Api.Services
-{
-    using Microsoft.Collections.Extensions;
-    using XpiritInsurance.Api.Models;
+﻿using Dapr.Client;
+using XpiritInsurance.Api.Models;
 
+namespace XpiritInsurance.Api.Services
+{
     public class InsuranceService
     {
-        private readonly MultiValueDictionary<string, Insurance> Data = new()
-        {
-            { "user 01", new Insurance(InsuranceType.Boat, 15) },
-            { "user 02", new Insurance(InsuranceType.House, 50) },
-            { "user 03", new Insurance(InsuranceType.Car, 31) }
-            //add some seed data
-        };
+        private const string _stateStoreName = "insurance_state";
+        private readonly DaprClient _daprClient;
+        private readonly Dictionary<string, string> _queryMetadata = new() { { "queryIndexName", "insuranceIndex" } };
+        private readonly Dictionary<string, string> _storeMetadata = new() { { "contentType", "application/json" } };
 
-        public Task<IReadOnlyCollection<Insurance>> GetInsurances(string userName)
+        public InsuranceService(DaprClient daprClient)
         {
-            IReadOnlyCollection<Insurance> result = Array.Empty<Insurance>();
-            if (Data.TryGetValue(userName, out var insurances))
-            {
-                result = insurances;
-            }
-            return Task.FromResult(result);
+            _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
         }
 
-        public virtual Task<Insurance> AddInsurance(Quote quote)
+        public async Task<IReadOnlyCollection<Insurance>> GetExistingInsurances(string userName)
         {
-            if (Data.TryGetValue(quote.UserName, out var insurances) && insurances.Any(i => i.InsuranceType == quote.InsuranceType))
-            {
-                var existing = insurances.Single(i => i.InsuranceType == quote.InsuranceType);
-                Data.Remove(quote.UserName, existing);
-            }
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new InvalidOperationException("Username cannot be null");
 
-            Insurance insurance = new(quote.InsuranceType, quote.AmountPerMonth);
-            Data.Add(quote.UserName, insurance);
-            return Task.FromResult(insurance);
+            string query = $"{{\"filter\": {{ \"EQ\": {{ \"userName\": \"{userName}\" }}}}, \"sort\": [{{\"key\": \"insuranceType\",\"order\": \"ASC\"}}]}}";
+            var response = await _daprClient.QueryStateAsync<Insurance>(_stateStoreName, query, metadata: _queryMetadata);
+            if (response.Results.Count == 0)
+                return Array.Empty<Insurance>();
+
+            return response.Results.Select(s => s.Data).ToList();
+        }
+
+        public virtual async Task<Quote> AddInsurance(string userName, Quote quote)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new InvalidOperationException("Username cannot be null");
+
+            var existing = await GetExistingInsurances(quote.UserName);
+            if (existing.Any(dc => dc.InsuranceType == quote.InsuranceType))
+                throw new InvalidOperationException("Existing insurance cannot be overwritten");
+
+            await _daprClient.SaveStateAsync(_stateStoreName, quote.Id.ToGuidString(), new Insurance(quote.InsuranceType, quote.AmountPerMonth, Guid.NewGuid(), userName), metadata: _storeMetadata);
+            return quote;
         }
     }
 }

@@ -1,0 +1,33 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: damageclaim_state
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6382
+  - name: redisPassword
+    value: ""
+  - name: queryIndexes
+    value: |
+      [
+        {
+          "name": "damageClaimIndex",
+          "indexes": [
+            {
+              "key": "userName",
+              "type": "TEXT"
+            },
+            {
+              "key": "insuranceType",
+              "type": "NUMERIC"
+            },
+            {
+              "key": "id",
+              "type": "TEXT"
+            }
+          ]
+        }
+      ]

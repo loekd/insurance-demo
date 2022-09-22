@@ -1,36 +1,54 @@
 ﻿
-using Microsoft.Collections.Extensions;
+using Dapr.Client;
 using XpiritInsurance.Api.Models;
 
 namespace XpiritInsurance.Api.Services
 {
     public class DamageClaimService
     {
-        private readonly MultiValueDictionary<string, DamageClaim> Data = new();
+        private const string _stateStoreName = "damageclaim_state";
+        private readonly DaprClient _daprClient;
+        private readonly Dictionary<string, string> _queryMetadata = new() { { "queryIndexName", "damageClaimIndex" } };
+        private readonly Dictionary<string, string> _storeMetadata = new() { { "contentType", "application/json" } };
 
-        public Task<IReadOnlyCollection<DamageClaim>> GetExistingDamageClaims(string userName)
+        public DamageClaimService(DaprClient daprClient)
         {
-            IReadOnlyCollection<DamageClaim> result = Array.Empty<DamageClaim>();
-            if (Data.TryGetValue(userName, out var insurances))
-            {
-                result = insurances;
-            }
-            return Task.FromResult(result);
+            _daprClient = daprClient ?? throw new ArgumentNullException(nameof(daprClient));
         }
 
-        public virtual Task<DamageClaim> ClaimNewDamage(DamageClaim claim)
+        public async Task<IReadOnlyCollection<DamageClaim>> GetExistingDamageClaims(string userName)
         {
-            if (claim.UserName == null)
+            if (string.IsNullOrWhiteSpace(userName))
                 throw new InvalidOperationException("Username cannot be null");
 
-            if (Data.TryGetValue(claim.UserName, out var claims) && claims.Any(i => i.InsuranceType == claim.InsuranceType))
-            {
-                var existing = claims.Single(i => i.InsuranceType == claim.InsuranceType);
-                Data.Remove(claim.UserName, existing);
-            }
+            string query = $"{{\"filter\": {{ \"EQ\": {{ \"userName\": \"{userName}\" }}}}, \"sort\": [{{\"key\": \"insuranceType\",\"order\": \"ASC\"}}]}}";
+            var response = await _daprClient.QueryStateAsync<DamageClaim>(_stateStoreName, query, metadata: _queryMetadata);
+            if (response.Results.Count == 0)
+                return Array.Empty<DamageClaim>();
 
-            Data.Add(claim.UserName, claim);
-            return Task.FromResult(claim);
+            return response.Results.Select(s => s.Data).ToList();
+        }
+
+        public virtual async Task<DamageClaim> ClaimNewDamage(DamageClaim damageClaim)
+        {
+            if (string.IsNullOrWhiteSpace(damageClaim.UserName))
+
+                throw new InvalidOperationException("Username cannot be null");
+
+            var existing = await GetExistingDamageClaims(damageClaim.UserName);
+            if (existing.Any(dc => dc.InsuranceType == damageClaim.InsuranceType))
+                throw new InvalidOperationException("Existing claim cannot be overwritten");
+
+            await _daprClient.SaveStateAsync(_stateStoreName, damageClaim.Id.ToGuidString(), damageClaim, metadata: _storeMetadata);
+            return damageClaim;
+        }
+    }
+
+    public static class GuidExtensions
+    {
+        public static string ToGuidString(this Guid guid)
+        {
+            return guid.ToString("N");
         }
     }
 }

@@ -1,0 +1,33 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: quote_state
+spec:
+  type: state.redis
+  version: v1
+  metadata:
+  - name: redisHost
+    value: localhost:6380
+  - name: redisPassword
+    value: ""
+  - name: queryIndexes
+    value: |
+      [
+        {
+          "name": "quoteIndex",
+          "indexes": [
+            {
+              "key": "userName",
+              "type": "TEXT"
+            },
+            {
+              "key": "insuranceType",
+              "type": "NUMERIC"
+            },
+            {
+              "key": "id",
+              "type": "TEXT"
+            }
+          ]
+        }
+      ]

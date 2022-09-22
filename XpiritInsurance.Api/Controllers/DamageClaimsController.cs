@@ -12,12 +12,12 @@
     [RequiredScope(RequiredScopesConfigurationKey = "AzureAdB2C:Scopes")]
     [ApiController]
     [Route("[controller]")]
-    public class DamageClaimController : ControllerBase
+    public class DamageClaimsController : ControllerBase
     {
-        private readonly ILogger<InsuranceController> _logger;
+        private readonly ILogger<InsurancesController> _logger;
         private readonly DamageClaimService _damageClaimService;
 
-        public DamageClaimController(ILogger<InsuranceController> logger, DamageClaimService damageClaimService)
+        public DamageClaimsController(ILogger<InsurancesController> logger, DamageClaimService damageClaimService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _damageClaimService = damageClaimService ?? throw new ArgumentNullException(nameof(damageClaimService));

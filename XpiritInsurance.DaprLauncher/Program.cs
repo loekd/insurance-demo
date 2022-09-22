@@ -13,6 +13,7 @@ namespace XpiritInsurance.DaprLauncher
             var assemblyVersion = assembly.GetName().Version;
             Console.WriteLine($"AssemblyVersion {assemblyVersion}");
 
+            //required value for monitored process id
             var monitoredProcessIdOption = new Option<int>
                 (name: "--monitored-process-id",
                 description: "Id of monitored process.")
@@ -21,7 +22,7 @@ namespace XpiritInsurance.DaprLauncher
             };
             monitoredProcessIdOption.AddAlias("-mpid");
 
-            //with attach
+            //with attach -- required value for sidecar process id
             var daprSideCarProcessIdOption = new Option<int>
                 (name: "--sidecar-process-id",
                 description: "Process Id of running Dapr sidecar process.")
@@ -32,25 +33,33 @@ namespace XpiritInsurance.DaprLauncher
 
             //with create
             var monitoredProcessPortOption = new Option<int>
-                (name: "--monitored-process-port",
+                (name: "--app-port",
                 description: "Port to connect to created Dapr sidecar process.",
                 getDefaultValue: () => 5001)
             {
                 IsRequired = true
             };
-            monitoredProcessPortOption.AddAlias("-mpp");
+            monitoredProcessPortOption.AddAlias("-p");
 
             var daprSideCarHttpPortOption = new Option<int>
-                (name: "--sidecar-process-http-port",
+                (name: "--dapr-http-port",
                 description: "HTTP port to connect target created Dapr sidecar process.",
                 getDefaultValue: () => 3501);
-            daprSideCarHttpPortOption.AddAlias("-schp");
 
             var daprSideCarGrpcPortOption = new Option<int>
-                (name: "--sidecar-process-grpc-port",
+                (name: "--dapr-grpc-port",
                 description: "GRPC port to connect target created Dapr sidecar process.",
                 getDefaultValue: () => 50002);
-            daprSideCarGrpcPortOption.AddAlias("-scgp");
+            
+            var daprSideCarComponentsPathOption = new Option<DirectoryInfo>
+                (name: "--components-path",
+                description: "Components folder for Dapr sidecar process.");
+            daprSideCarComponentsPathOption.AddAlias("-d");
+
+            var daprSideCarConfigFileOption = new Option<FileInfo>
+                (name: "--config",
+                description: "Config file for Dapr sidecar process.");
+            daprSideCarConfigFileOption.AddAlias("-c");
 
             var rootCommand = new RootCommand("Monitors a process and kills its sidecar when it exits.");
 
@@ -60,14 +69,18 @@ namespace XpiritInsurance.DaprLauncher
                 monitoredProcessIdOption,
                 monitoredProcessPortOption,
                 daprSideCarHttpPortOption,
-                daprSideCarGrpcPortOption
+                daprSideCarGrpcPortOption, 
+                daprSideCarComponentsPathOption, 
+                daprSideCarConfigFileOption
             };
-            createSideCarCommand.SetHandler((monitoredProcessIdOptionValue, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue) =>
+            createSideCarCommand.SetHandler((monitoredProcessIdOptionValue, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, daprSideCarComponentsPathOptionValue, daprSideCarConfigFileOptionValue) =>
             {
                 Console.WriteLine($"--monitored-process-id = {monitoredProcessIdOptionValue}");
-                Console.WriteLine($"--monitored-process-port = {monitoredProcessPortOptionValue}");
-                Console.WriteLine($"--sidecar-process-http-port= {daprSideCarHttpPortOptionValue}");
-                Console.WriteLine($"--sidecar-process-grpc-port= {daprSideCarGrpcPortOptionValue}");
+                Console.WriteLine($"--app-port = {monitoredProcessPortOptionValue}");
+                Console.WriteLine($"--dapr-http-portt= {daprSideCarHttpPortOptionValue}");
+                Console.WriteLine($"--dapr-grpc-port= {daprSideCarGrpcPortOptionValue}");
+                Console.WriteLine($"--components-path= {daprSideCarComponentsPathOptionValue?.FullName ?? "undefined"}");
+                Console.WriteLine($"--config= {daprSideCarConfigFileOptionValue?.FullName ?? "undefined"}");
 
                 Console.WriteLine("Finding monitored process");
                 if (!TryGetProcess(monitoredProcessIdOptionValue, out Process? monitored))
@@ -77,7 +90,7 @@ namespace XpiritInsurance.DaprLauncher
                 }
 
                 Console.WriteLine("Creating dapr sidecar process");
-                if (!TryCreateProcess(monitored!.ProcessName, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, process: out Process? sidecar))
+                if (!TryCreateProcess(monitored!.ProcessName, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, daprSideCarComponentsPathOptionValue, daprSideCarConfigFileOptionValue, process: out Process? sidecar))
                 {
                     Console.Error.WriteLine("Dapr sidecar failed to launch");
                     return;
@@ -92,7 +105,7 @@ namespace XpiritInsurance.DaprLauncher
                     Console.WriteLine("Failed");
                 }
 
-            }, monitoredProcessIdOption, monitoredProcessPortOption, daprSideCarHttpPortOption, daprSideCarGrpcPortOption);
+            }, monitoredProcessIdOption, monitoredProcessPortOption, daprSideCarHttpPortOption, daprSideCarGrpcPortOption, daprSideCarComponentsPathOption, daprSideCarConfigFileOption);
 
             //monitor dapr
             var attachSideCarCommand = new Command("--attach-sidecar-process", "Attach side car")
@@ -135,24 +148,23 @@ namespace XpiritInsurance.DaprLauncher
             await rootCommand.InvokeAsync(args);
         }
 
-        private static bool TryCreateProcess(string appId, int appPort, int daprHttpPort, int daprGrpcPort, [NotNullWhen(true)] out Process? process)
+        private static bool TryCreateProcess(string appId, int appPort, int daprHttpPort, int daprGrpcPort, DirectoryInfo? componentsFolder, FileInfo? configFile, [NotNullWhen(true)] out Process? process)
         {
+            string arguments = $"run --app-id {appId} --app-port {appPort} --dapr-http-port {daprHttpPort} --dapr-grpc-port {daprGrpcPort}";
+            if (configFile != null && configFile.Exists)
+                arguments += $" --config {configFile.FullName}";
+
+            if (componentsFolder != null && componentsFolder.Exists)
+                arguments += $" --components-path {componentsFolder.FullName}";
+
             var psi = new ProcessStartInfo(Environment.ExpandEnvironmentVariables(" %SystemDrive%/dapr/dapr.exe"))
             {
                 UseShellExecute = false,
-                //WindowStyle = ProcessWindowStyle.Hidden,
-                //CreateNoWindow = true,
-                Arguments = $"run --app-id {appId} --app-port {appPort} --dapr-http-port {daprHttpPort} --dapr-grpc-port {daprGrpcPort}",
-                //RedirectStandardOutput = true,
-                //RedirectStandardError = true,
+                Arguments = arguments,
             };
             try
             {
                 process = Process.Start(psi)!;
-                //process.OutputDataReceived += (s, e) => Console.WriteLine($"DAPR: {e.Data}", ConsoleColor.Blue);
-                //process.ErrorDataReceived += (s, e) => Console.WriteLine($"DAPR: {e.Data}", ConsoleColor.Red);
-                //process.BeginErrorReadLine();
-                //process.BeginOutputReadLine();
                 Console.WriteLine("Launched side car pid:{0}", process.Id);
 
                 return true;

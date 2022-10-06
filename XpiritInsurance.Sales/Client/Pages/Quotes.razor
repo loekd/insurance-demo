@@ -137,7 +137,7 @@
             _isLoading = true;
             var it = (InsuranceType)Enum.Parse(typeof(InsuranceType), insuranceType);
             var quote = await Http.PostAsJsonAsync<Quote>($"quotes", new Quote("", it, 0m, Guid.NewGuid()));
-
+            quote.EnsureSuccessStatusCode();
             await LoadData();
         }
         catch (AccessTokenNotAvailableException exception)

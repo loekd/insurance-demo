@@ -2,14 +2,34 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: blue !important
+}
+.top-row {
+    background-color: blue !important;
+    color: white !important;
+}
+
+.h1 {
+    outline: none;
+    color: white;
+}
+
+a, .btn-link {
+    color: white !important;
+}
+
+.sidebar {
+    background-image: none !important;
+    background-color: darkblue;
+}
+
+.mud-input {
+    color: grey !important;
+    background: white;
 }
 
 h1:focus {
     outline: none;
-}
-
-a, .btn-link {
-    color: #0071c1;
 }
 
 .btn-primary {
@@ -20,6 +40,7 @@ a, .btn-link {
 
 .content {
     padding-top: 1.1rem;
+    color: white;
 }
 
 .valid.modified:not([type=checkbox]) {

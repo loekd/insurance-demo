@@ -21,6 +21,7 @@
           <Pattern RegularExpression="^[a-zA-Z0-9]+[a-zA-Z0-9_-]*$" HelpText="The username you provided is not valid. It must begin with an alphabet or number and can contain alphabets, numbers and the following symbols: _ -" />
         </Restriction>
       </ClaimType>
+
       <ClaimType Id="extension_identityIsVerified">
         <DisplayName>Identitiy verified</DisplayName>
         <DataType>boolean</DataType>
@@ -328,6 +329,7 @@
             <OutputClaim ClaimTypeReferenceId="socialIdpUserId" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="issuerUserId" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name" />
+            <OutputClaim ClaimTypeReferenceId="socialIdpUserName" PartnerClaimType="nickname" />
             <OutputClaim ClaimTypeReferenceId="email" />
           </OutputClaims>
           <OutputClaimsTransformations>
@@ -373,6 +375,7 @@
             <OutputClaim ClaimTypeReferenceId="socialIdpUserId" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="issuerUserId" PartnerClaimType="sub" />
             <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name" />
+            <OutputClaim ClaimTypeReferenceId="socialIdpUserName" PartnerClaimType="nickname" />
             <OutputClaim ClaimTypeReferenceId="email" />
           </OutputClaims>
           <OutputClaimsTransformations>
@@ -416,6 +419,7 @@
             <OutputClaim ClaimTypeReferenceId="givenName" PartnerClaimType="given_name" />
             <OutputClaim ClaimTypeReferenceId="surName" PartnerClaimType="family_name" />
             <OutputClaim ClaimTypeReferenceId="displayName" PartnerClaimType="name" />
+            <OutputClaim ClaimTypeReferenceId="socialIdpUserName" PartnerClaimType="nickname" />
             <OutputClaim ClaimTypeReferenceId="authenticationSource" DefaultValue="socialIdpAuthentication" AlwaysUseDefaultValue="true" />
             <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="Xpirit" AlwaysUseDefaultValue="true" />
           </OutputClaims>

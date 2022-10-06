@@ -56,6 +56,7 @@
         <OutputClaim ClaimTypeReferenceId="identityProvider" DefaultValue="AzureADB2C" PartnerClaimType="idp" />
         <OutputClaim ClaimTypeReferenceId="extension_identityIsVerified" DefaultValue="false" PartnerClaimType="idVerified" />
         <OutputClaim ClaimTypeReferenceId="policy" DefaultValue="{Policy:PolicyId}" AlwaysUseDefaultValue="true" PartnerClaimType="tfp"/>
+        <OutputClaim ClaimTypeReferenceId="socialIdpUserName" PartnerClaimType="remoteName" />
       </OutputClaims>
       <SubjectNamingInfo ClaimType="sub" />
     </TechnicalProfile>

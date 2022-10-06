@@ -6,7 +6,7 @@
 
 <AuthorizeView>
     <Authorized>
-        Hello, @context.User.Identity?.Name!
+        @(GetUserDisplayName(context))
         <button class="nav-link btn btn-link" @onclick="BeginLogin">Refresh log in</button>
         <button class="nav-link btn btn-link" @onclick="BeginLogout">Log out</button>
     </Authorized>
@@ -17,6 +17,9 @@
 </AuthorizeView>
 
 @code{
+    private const string remoteUserNameClaimType = "remoteName";
+    private const string idpClaimType = "idp";
+
     private async Task BeginLogin(MouseEventArgs args)
     {
         await SignOutManager.SetSignOutState();
@@ -32,6 +35,26 @@
     private void LinkAccount(MouseEventArgs args)
     {
         //not supported in a proper way atm.
-        Navigation.NavigateTo("https://xpiritinsurance.b2clogin.com/xpiritinsurance.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_ACCOUNTLINK_EXTENSIONS&client_id=e280fc38-2898-4fad-baaf-fbeb1d306bd1&nonce=defaultNonce&redirect_uri=https%3A%2F%2Flocalhost%3A7150%2Fauthentication%2Flogin-callback&scope=openid%20https%3A%2F%2Fxpiritinsurance.onmicrosoft.com%2F3b551417-548e-4e8e-80c3-44bb06f3aa64%2FAPI.Access&response_type=code&prompt=login&code_challenge=YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl&code_challenge_method=S256");
+        Navigation.NavigateTo("https://xpiritinsurance.b2clogin.com/xpiritinsurance.onmicrosoft.com/oauth2/v2.0/authorize?p=B2C_1A_ACCOUNTLINK_EXTENSIONS&client_id=e280fc38-2898-4fad-baaf-fbeb1d306bd1&nonce=defaultNonce&redirect_uri=https%3A%2F%2Flocalhost%3A7150%2Fauthentication%2Flogin-callback&scope=openid%20https%3A%2F%2Fxpiritinsurance.onmicrosoft.com%2F3b551417-548e-4e8e-80c3-44bb06f3aa64%2FAPI.ReadWrite&response_type=code&prompt=login&code_challenge=YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl&code_challenge_method=S256");
+    }
+
+    private string GetUserDisplayName(AuthenticationState context)
+    {
+        if (context == null || context.User.Identity == null || !context.User.Identity.IsAuthenticated)
+            return "anonymous";
+
+        string userName = context.User.Identity.Name!;
+        var nickNameClaim = context.User.Claims.SingleOrDefault(c => c.Type == remoteUserNameClaimType)?.Value;
+
+        //show display name from B2C and from federated IDP if available
+        if (!string.IsNullOrWhiteSpace(nickNameClaim) && !string.Equals(nickNameClaim, userName))
+        {
+            var idpClaim = context.User.Claims.SingleOrDefault(c => c.Type == idpClaimType)?.Value;
+            return $"Local: {userName} || {idpClaim}: {nickNameClaim}"; 
+        }
+        else
+        {
+            return $"Local: {userName}";
+        }
     }
 }

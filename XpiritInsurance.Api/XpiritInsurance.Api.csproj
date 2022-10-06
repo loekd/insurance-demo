@@ -11,9 +11,7 @@
     <PackageReference Include="Dapr.AspNetCore" Version="1.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0-rc.1.22427.2" NoWarn="NU1605" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.0-rc.1.22427.2" NoWarn="NU1605" />
-    <PackageReference Include="Microsoft.Experimental.Collections" Version="1.0.6-e190117-3" />
     <PackageReference Include="Microsoft.Identity.Web" Version="1.25.2" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="1.25.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 

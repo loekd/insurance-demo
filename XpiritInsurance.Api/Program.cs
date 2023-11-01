@@ -25,9 +25,10 @@ public class Program
             var psi = new ProcessStartInfo("dotnet")
             {
                 UseShellExecute = false,
-                Arguments = $"tool run daprlauncher --create-sidecar-process --monitored-process-id {thisProces.Id} --app-port 5142 --components-path {Path.Combine(Environment.CurrentDirectory, "components")}",
+                Arguments = $"tool run daprlauncher --create-sidecar-process --monitored-process-id {thisProces.Id} --app-port 5142 --resources-path {Path.Combine(Environment.CurrentDirectory, "components")}",
             };
             var launcher = Process.Start(psi)!;
+            if (launcher.HasExited) throw new InvalidOperationException("Failed to launch Dapr");
         }
 
         var builder = WebApplication.CreateBuilder(args);

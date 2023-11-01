@@ -52,14 +52,19 @@ namespace XpiritInsurance.DaprLauncher
                 getDefaultValue: () => 50002);
             
             var daprSideCarComponentsPathOption = new Option<DirectoryInfo>
-                (name: "--components-path",
-                description: "Components folder for Dapr sidecar process.");
-            daprSideCarComponentsPathOption.AddAlias("-d");
+                (name: "--resources-path",
+                description: "Resource (components) folder for Dapr sidecar process.");
+            daprSideCarComponentsPathOption.AddAlias("-r");
 
             var daprSideCarConfigFileOption = new Option<FileInfo>
                 (name: "--config",
                 description: "Config file for Dapr sidecar process.");
             daprSideCarConfigFileOption.AddAlias("-c");
+
+            var debugOption = new Option<bool>
+                (name: "--debug",
+                description: "Attach and break debugger.");
+            debugOption.AddAlias("-d");
 
             var rootCommand = new RootCommand("Monitors a process and kills its sidecar when it exits.");
 
@@ -71,9 +76,10 @@ namespace XpiritInsurance.DaprLauncher
                 daprSideCarHttpPortOption,
                 daprSideCarGrpcPortOption, 
                 daprSideCarComponentsPathOption, 
-                daprSideCarConfigFileOption
+                daprSideCarConfigFileOption,
+                debugOption
             };
-            createSideCarCommand.SetHandler((monitoredProcessIdOptionValue, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, daprSideCarComponentsPathOptionValue, daprSideCarConfigFileOptionValue) =>
+            createSideCarCommand.SetHandler((monitoredProcessIdOptionValue, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, daprSideCarComponentsPathOptionValue, daprSideCarConfigFileOptionValue, debugOptionValue) =>
             {
                 Console.WriteLine($"--monitored-process-id = {monitoredProcessIdOptionValue}");
                 Console.WriteLine($"--app-port = {monitoredProcessPortOptionValue}");
@@ -81,6 +87,14 @@ namespace XpiritInsurance.DaprLauncher
                 Console.WriteLine($"--dapr-grpc-port= {daprSideCarGrpcPortOptionValue}");
                 Console.WriteLine($"--components-path= {daprSideCarComponentsPathOptionValue?.FullName ?? "undefined"}");
                 Console.WriteLine($"--config= {daprSideCarConfigFileOptionValue?.FullName ?? "undefined"}");
+                Console.WriteLine($"--debug= {debugOptionValue}");
+
+                if (debugOptionValue)
+                {
+                    Console.WriteLine("Attaching and launching the debugger");
+                    Debugger.Launch();
+                    Debugger.Break();
+                }
 
                 Console.WriteLine("Finding monitored process");
                 if (!TryGetProcess(monitoredProcessIdOptionValue, out Process? monitored))
@@ -90,7 +104,8 @@ namespace XpiritInsurance.DaprLauncher
                 }
 
                 Console.WriteLine("Creating dapr sidecar process");
-                if (!TryCreateProcess(monitored!.ProcessName, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, daprSideCarComponentsPathOptionValue, daprSideCarConfigFileOptionValue, process: out Process? sidecar))
+                string appId = monitored!.ProcessName.Replace(".", "_");
+                if (!TryCreateProcess(appId, monitoredProcessPortOptionValue, daprSideCarHttpPortOptionValue, daprSideCarGrpcPortOptionValue, daprSideCarComponentsPathOptionValue, daprSideCarConfigFileOptionValue, process: out Process? sidecar))
                 {
                     Console.Error.WriteLine("Dapr sidecar failed to launch");
                     return;
@@ -105,7 +120,7 @@ namespace XpiritInsurance.DaprLauncher
                     Console.WriteLine("Failed");
                 }
 
-            }, monitoredProcessIdOption, monitoredProcessPortOption, daprSideCarHttpPortOption, daprSideCarGrpcPortOption, daprSideCarComponentsPathOption, daprSideCarConfigFileOption);
+            }, monitoredProcessIdOption, monitoredProcessPortOption, daprSideCarHttpPortOption, daprSideCarGrpcPortOption, daprSideCarComponentsPathOption, daprSideCarConfigFileOption, debugOption);
 
             //monitor dapr
             var attachSideCarCommand = new Command("--attach-sidecar-process", "Attach side car")
@@ -155,7 +170,7 @@ namespace XpiritInsurance.DaprLauncher
                 arguments += $" --config {configFile.FullName}";
 
             if (componentsFolder != null && componentsFolder.Exists)
-                arguments += $" --components-path {componentsFolder.FullName}";
+                arguments += $" --resources-path {componentsFolder.FullName}";
 
             var psi = new ProcessStartInfo(Environment.ExpandEnvironmentVariables(" %SystemDrive%/dapr/dapr.exe"))
             {
@@ -165,7 +180,7 @@ namespace XpiritInsurance.DaprLauncher
             try
             {
                 process = Process.Start(psi)!;
-                Console.WriteLine("Launched side car pid:{0}", process.Id);
+                Console.WriteLine("Launched side car pid:{0}. Exited: {1}", process.Id, process.HasExited);
 
                 return true;
             }

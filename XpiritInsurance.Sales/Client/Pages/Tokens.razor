@@ -21,7 +21,7 @@
 
     @if (_token != null)
     {
-        <MudTextField @bind-Value="_token" ReadOnly="true" Label="token" Lines="20" />
+        <pre><MudTextField @bind-Value="_token" ReadOnly="true" Label="token" Lines="20" /></pre>
         <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => _token = null">Clear</MudButton>
     }
 

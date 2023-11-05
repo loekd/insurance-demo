@@ -164,7 +164,16 @@
             var quote = _quotes.SingleOrDefault(q => q.InsuranceType == it);
             if (quote != null)
             {
-                var response = await Http.PostAsJsonAsync<Quote>($"insurances", quote);
+                HttpResponseMessage? response;
+                switch(it)
+                {
+                    case InsuranceType.Health :
+                        response = await Http.PostAsJsonAsync<Quote>($"insurances/official", quote);
+                        break;
+                    default:
+                        response = await Http.PostAsJsonAsync<Quote>($"insurances", quote);
+                        break;
+                }                
                 response.EnsureSuccessStatusCode();
                 Snackbar.Add($"Bought {insuranceType} insurance.", Severity.Info);
 

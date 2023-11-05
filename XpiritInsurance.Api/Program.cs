@@ -6,16 +6,19 @@ using Microsoft.IdentityModel.Protocols;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Microsoft.IdentityModel.JsonWebTokens;
+using System.Security.Claims;
 
 namespace XpiritInsurance.Api;
 
 public class Program
 {
     private const string CorsPolicyName = "CorsPolicy";
+    public const string DefaultPrivilegesPolicyName = "DefaultPrivilegesPolicy";
+    public const string ElevatedPrivilegesPolicyName = "ElevatedPrivilegesPolicy";
 
     public static void Main(string[] args)
     {
-        if (args.Any(a=> a.Contains("dapr")))
+        if (args.Any(a => a.Contains("dapr")))
         {
             //attach dapr sidecar to this process on the fly
             //it watches this process and will stop when it exits
@@ -53,8 +56,45 @@ public class Program
 
                             return config.JsonWebKeySet.GetSigningKeys();
                         };
+
+#if DEBUG
+                        IdentityModelEventSource.ShowPII = true; //don't enable this on prod
+                        options.RequireHttpsMetadata = false;
+                        //for debugging, put breakpoints on callbacks if needed
+                        options.Events = new JwtBearerEvents
+                        {
+                            OnAuthenticationFailed = ctx =>
+                            {
+                                return Task.CompletedTask;
+                            },
+
+                            OnTokenValidated = ctx =>
+                            {
+                                AddPrincipalClaimsFromToken(ctx);
+                                return Task.CompletedTask;
+                            },
+
+                            OnForbidden = ctx =>
+                            {
+                                return Task.CompletedTask;
+                            }
+                        };
+#endif
                     },
                     options => { builder.Configuration.Bind("AzureAdB2C", options); });
+
+        //configure authorization policies
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy(DefaultPrivilegesPolicyName, policy =>
+            {
+                policy.RequireAuthenticatedUser(); //authenticated users only
+                policy.RequireClaim(ClaimConstants.Scp, "API.ReadWrite");
+            })
+            .AddPolicy(ElevatedPrivilegesPolicyName, policy =>
+            {
+                policy.RequireAuthenticatedUser(); //authenticated users only
+                policy.RequireClaim(ClaimConstants.Scp, "IdentityVerified");
+            });
 
         //allow both front-ends
         builder.Services.AddCors(options =>
@@ -92,7 +132,6 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            IdentityModelEventSource.ShowPII = true;
             app.UseSwagger();
             app.UseSwaggerUI();
         }
@@ -100,5 +139,26 @@ public class Program
         app.MapControllers();
 
         app.Run();
+    }
+
+    private static void AddPrincipalClaimsFromToken(TokenValidatedContext ctx)
+    {
+        //check if user is identified for health insurance, by checking a custom claim named 'idVerified'
+        //this is set to 'true' when a 'DigiD' identity is connected to the current user account.
+        IEnumerable<Claim> claimSet = ((JsonWebToken)ctx.SecurityToken).Claims;
+        bool idVerified = claimSet.SingleOrDefault(c => c.Type == "idVerified")?.Value == "true";
+        if (idVerified)
+        {
+            var claim = new Claim(ClaimConstants.Scp, "IdentityVerified");
+            ((ClaimsIdentity)ctx.Principal!.Identity!).AddClaim(claim);
+        }
+
+        //check if the user has a scope claim with value API.ReadWrite
+        bool apiAccess = claimSet.SingleOrDefault(c => c.Type == ClaimConstants.Scp)?.Value == "API.ReadWrite";
+        if (apiAccess)
+        {
+            var claim = new Claim(ClaimConstants.Scp, "API.ReadWrite");
+            ((ClaimsIdentity)ctx.Principal!.Identity!).AddClaim(claim);
+        }
     }
 }

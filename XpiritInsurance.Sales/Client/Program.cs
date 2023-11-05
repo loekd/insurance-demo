@@ -14,7 +14,6 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped<CustomAuthorizationMessageHandler>();
-//builder.Services.AddHttpClient("XpiritInsurance.DamageClaims.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
 builder.Services.AddHttpClient("XpiritInsurance.DamageClaims.ServerAPI", client => client.BaseAddress = new Uri("https://localhost:7008/"))
     .AddHttpMessageHandler<CustomAuthorizationMessageHandler>();
 

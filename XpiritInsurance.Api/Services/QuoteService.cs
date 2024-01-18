@@ -28,10 +28,13 @@ namespace XpiritInsurance.Api.Services
                     amount = new Random(Guid.NewGuid().GetHashCode()).Next(5, 15);
                     break;
                 case InsuranceType.Health:
-                    amount = new Random(Guid.NewGuid().GetHashCode()).Next(79, 150);
+                    amount = new Random(Guid.NewGuid().GetHashCode()).Next(120, 170);
                     break;
                 case InsuranceType.Glass:
                     amount = new Random(Guid.NewGuid().GetHashCode()).Next(10, 31);
+                    break;
+                case InsuranceType.Car:
+                    amount = new Random(Guid.NewGuid().GetHashCode()).Next(50, 90);
                     break;
             }
 

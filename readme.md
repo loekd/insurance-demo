@@ -19,6 +19,7 @@ Demo app to go with talk about modern Identity Platforms.
 
 - Build the .NET Tool 
   - Build XpiritInsurance.DaprLauncher
+  - `dotnet pack --no-build --configuration DEBUG --output nupkg`
   - Install the tool from the build output folder
   - `dotnet tool install --add-source C:\MyProjects\XpiritInsurance.DaprLauncher\nupkg xpirit.daprlauncher`
 - Select as startup projects:

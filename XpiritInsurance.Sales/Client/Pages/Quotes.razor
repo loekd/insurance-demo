@@ -35,11 +35,11 @@
                     else if (TryGetExistingQuote(quote.Key) != null)
                     {
                         <td>Quote for @(GetQuoteMonthlyDue(quote.Key))€ per month</td>
-                        <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => Buy(quote.Key)">Buy this</MudButton></td>
+                        <td><MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => Buy(quote.Key)">Buy this</MudButton></td>
                     }
                     else
                     {
-                        <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
+                        <td><MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => GetQuote(quote.Key)">Get quote</MudButton></td>
                         <td />
                     }
                 </tr>

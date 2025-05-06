@@ -14,15 +14,15 @@
 
 <div class="contentDiv">
 
-    <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.IdToken); }">Show ID token</MudButton>
-    <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.AccessToken); }">Show Access token</MudButton>
-    <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.RefreshToken); }">Show Refresh token</MudButton>
-    <MudCheckBox @bind-Checked="@_decodeTokens">Decode token</MudCheckBox>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.IdToken); }">Show ID token</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.AccessToken); }">Show Access token</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.RefreshToken); }">Show Refresh token</MudButton>
+    <MudCheckBox T="bool" @bind-Value="@_decodeTokens">Decode token</MudCheckBox>
 
     @if (_token != null)
     {
         <pre><MudTextField @bind-Value="_token" ReadOnly="true" Label="token" Lines="20" /></pre>
-        <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => _token = null">Clear</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => _token = null">Clear</MudButton>
     }
 
 </div>

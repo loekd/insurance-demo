@@ -8,7 +8,7 @@
 
 <h1>Claim damage or loss</h1>
 
-<MudDialog @bind-IsVisible="_dialogIsVisible" Options="dialogOptions">
+<MudDialog @bind-Visible="_dialogIsVisible" Options="dialogOptions">
     <TitleContent>
         <MudText Typo="Typo.h6">
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3" /> Specify claim
@@ -20,7 +20,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Submit" Class="px-10">Ok</MudButton>
-        <MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => _dialogIsVisible = false">Cancel</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => _dialogIsVisible = false">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -45,7 +45,7 @@
                         <td>@insurance.InsuranceType</td>
                         @if (TryGetDamageClaim(insurance.InsuranceType) == null)
                         {
-                            <td><MudButton Variant="Variant.Filled" DisableElevation="true" Color="Color.Primary" @onclick="() => SpecifyDamageClaim(insurance.InsuranceType)">Claim</MudButton></td>
+                            <td><MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => SpecifyDamageClaim(insurance.InsuranceType)">Claim</MudButton></td>
                         }
                         else
                         {

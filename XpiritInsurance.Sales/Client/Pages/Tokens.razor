@@ -13,12 +13,16 @@
 <h1>Tokens</h1>
 
 <div class="contentDiv">
-
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.IdToken); }">Show ID token</MudButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.AccessToken); }">Show Access token</MudButton>
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.RefreshToken); }">Show Refresh token</MudButton>
-    <MudCheckBox T="bool" @bind-Value="@_decodeTokens">Decode token</MudCheckBox>
-
+    <span>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.IdToken); }">Show ID token</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.AccessToken); }">Show Access token</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.RefreshToken); }">Show Refresh token</MudButton>
+    </span>
+    <span>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.IdToken, true); }">Show decoded ID token</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.AccessToken, true); }">Show decoded Access token</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="async () => { _token = await GetJwtToken(TokenType.RefreshToken, true); }">Show decoded Refresh token</MudButton>
+    </span>
     @if (_token != null)
     {
         <pre><MudTextField @bind-Value="_token" ReadOnly="true" Label="token" Lines="20" /></pre>
@@ -29,7 +33,7 @@
 
 
 @code {
-    private bool _decodeTokens = false;
+    
     private MarkupString? _token;
     private enum TokenType
     {
@@ -42,7 +46,7 @@
     /// Gets the raw JWT id_token.
     /// </summary>
     /// <returns></returns>
-    private async Task<MarkupString?> GetJwtToken(TokenType tokenType)
+    private async Task<MarkupString?> GetJwtToken(TokenType tokenType, bool decodeTokens = false)
     {
         string token;
         string method;
@@ -64,18 +68,18 @@
         // Uses MSAL when working with AAD only
         token = await this.JSRuntime.InvokeAsync<string>(method);
 
-        if (token == null)
+        if (string.IsNullOrWhiteSpace(token))
         {
             Snackbar.Add($"Token fetch failed", Severity.Warning);
             return null;
         }
 
-        if (_decodeTokens)
+        if (decodeTokens)
         {
             JwtSecurityToken parsed = new JwtSecurityToken(token);
             token = parsed.ToString();
 
-            int index = token.IndexOf("}.{");
+            int index = token.IndexOf("}.{", StringComparison.InvariantCulture);
             if (index > 0)
             {
                 string kid = token.Substring(0, index + 1);
